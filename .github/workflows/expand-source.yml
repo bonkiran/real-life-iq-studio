@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Rebuild and expand source archive
         run: |
-          cat source_parts/part*.txt | base64 -d > studio_source_rebuilt.zip
+          cat source_parts/part01.txt source_parts/part02.txt source_parts/part03.txt source_parts/part04.txt source_parts/part05.txt source_parts/part06a.txt source_parts/part06b.txt source_parts/part07.txt source_parts/part08.txt | base64 -d > studio_source_rebuilt.zip
           unzip -o studio_source_rebuilt.zip -d .
       - name: Commit expanded source
         run: |
