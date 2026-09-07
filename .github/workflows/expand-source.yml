@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - studio_source.zip
+      - source_parts/READY
 
 permissions:
   contents: write
@@ -15,8 +15,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Expand source archive
-        run: unzip -o studio_source.zip -d .
+      - name: Rebuild and expand source archive
+        run: |
+          cat source_parts/part*.txt | base64 -d > studio_source_rebuilt.zip
+          unzip -o studio_source_rebuilt.zip -d .
       - name: Commit expanded source
         run: |
           git config user.name "github-actions[bot]"
