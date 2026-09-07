@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block page_title %}Trusted Sources{% endblock %}
+{% block page_subtitle %}Evidence first: credible sources attached to our safety framework.{% endblock %}
+{% block content %}
+<section class="panel"><div class="table-wrap"><table><thead><tr><th>Source</th><th>Authority</th><th>Best for</th><th>Editorial note</th><th></th></tr></thead><tbody>{% for s in sources %}<tr><td><strong>{{s.name}}</strong></td><td>{{s.authority or ''}}</td><td>{{s.best_for or ''}}</td><td>{{s.editorial_note or ''}}</td><td>{% if s.url %}<a href="{{s.url}}" target="_blank">Open ↗</a>{% endif %}</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

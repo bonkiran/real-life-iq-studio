@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block page_title %}Idea Library{% endblock %}
+{% block page_subtitle %}Strategic backlog from the REAL-LIFE IQ living tracker.{% endblock %}
+{% block content %}
+<section class="panel">
+  <form class="filters" method="get"><input name="q" value="{{ q }}" placeholder="Search ideas"><select name="pillar"><option value="">All pillars</option>{% for x in pillars %}<option value="{{x}}" {{'selected' if pillar==x else ''}}>{{x}}</option>{% endfor %}</select><select name="status"><option value="">All statuses</option>{% for x in statuses %}<option value="{{x}}" {{'selected' if status==x else ''}}>{{x}}</option>{% endfor %}</select><button class="button secondary">Filter</button></form>
+  <div class="idea-grid">
+  {% for i in ideas %}<article class="idea-card">
+    <div class="idea-top"><span>{{ i.idea_id or ('IDEA-' ~ i.id) }}</span><b>{{ i.priority or '' }}</b></div>
+    <h3>{{ i.working_title }}</h3><p>{{ i.problem or i.hook or '' }}</p>
+    <div class="idea-meta"><span>{{ i.pillar }}</span><span>{{ i.series }}</span><span>{{ i.status }}</span></div>
+    <details><summary>Safe action & source</summary><p>{{ i.safe_action or '' }}</p>{% if i.source_url %}<a href="{{ i.source_url }}" target="_blank">{{ i.source_name or 'Source' }} ↗</a>{% endif %}</details>
+    {% if i.status not in ['Published','Final Ready','In Production'] %}<form method="post" action="{{ url_for('promote_idea', idea_id=i.id) }}"><button class="button small">Start production</button></form>{% endif %}
+  </article>{% endfor %}
+  </div>
+</section>
+{% endblock %}
