@@ -12,6 +12,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSON
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from security import install_auth
+from studio_sync import sync_whatsapp_series
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data"))).resolve()
@@ -303,3 +304,4 @@ def health(): return JSONResponse({"status":"ok","app":"REAL-LIFE IQ Content Stu
 
 
 init_db()
+sync_whatsapp_series(db_connect, ensure_stages)
