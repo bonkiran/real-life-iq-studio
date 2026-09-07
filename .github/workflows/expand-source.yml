@@ -1,0 +1,30 @@
+name: Expand REAL-LIFE IQ Studio source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - studio_source.zip
+
+permissions:
+  contents: write
+
+jobs:
+  expand:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Expand source archive
+        run: unzip -o studio_source.zip -d .
+      - name: Commit expanded source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.py requirements.txt render.yaml .gitignore static templates seed data/uploads/.gitkeep README.md
+          if git diff --cached --quiet; then
+            echo "No source changes to commit."
+            exit 0
+          fi
+          git commit -m "Expand REAL-LIFE IQ Content Studio source"
+          git push
