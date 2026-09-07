@@ -26,10 +26,8 @@
         <h1>{% block page_title %}REAL-LIFE IQ Studio{% endblock %}</h1>
         <p>{% block page_subtitle %}Smarter Choices for Real Life.{% endblock %}</p>
       </div>
-      <div class="pill">Safety-first production system</div>
+      <div class="pill">Safety-first production system &nbsp;·&nbsp; <a href="{{ url_for('logout') }}">Sign out</a></div>
     </header>
-
-    
 
     {% block content %}{% endblock %}
     <footer>REAL-LIFE IQ Content Studio · {{ now_year }}</footer>
