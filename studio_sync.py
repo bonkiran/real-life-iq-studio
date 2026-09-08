@@ -7,6 +7,7 @@ def sync_whatsapp_series(db_connect, ensure_stages):
     """Idempotently keep the WhatsApp mini-series and revised workflow in the Studio."""
     con = db_connect()
     now = datetime.now().isoformat(timespec="seconds")
+    published_date = "2026-09-07"
 
     # Workflow V2: prepare the publishing package BEFORE final-video assembly.
     stage_order = {
@@ -24,7 +25,38 @@ def sync_whatsapp_series(db_connect, ensure_stages):
             (order_no, stage_name, key),
         )
 
-    # Video #4 — Prevention. The user has approved slides, voice-over, final video and title.
+    def mark_published(video_number: int):
+        video = con.execute("SELECT * FROM videos WHERE number=?", (video_number,)).fetchone()
+        if not video:
+            return None
+        con.execute(
+            """UPDATE videos
+               SET status='Published',
+                   upload_date=COALESCE(upload_date, ?),
+                   publish_date=COALESCE(publish_date, ?),
+                   updated_at=?
+               WHERE id=?""",
+            (published_date, published_date, now, video["id"]),
+        )
+        for key in ("problem", "slides", "voice", "publishing", "final_video", "published"):
+            con.execute(
+                """UPDATE stages
+                   SET status='Approved', approved_at=COALESCE(approved_at, ?)
+                   WHERE video_id=? AND stage_key=?""",
+                (now, video["id"], key),
+            )
+        con.execute(
+            """UPDATE stages
+               SET status='In Review', approved_at=NULL
+               WHERE video_id=? AND stage_key='metrics' AND status!='Approved'""",
+            (video["id"],),
+        )
+        return video["id"]
+
+    # Video #3 — Package Delivery Scam is now published.
+    mark_published(3)
+
+    # Video #4 — Prevention. Keep its approved publishing package populated.
     v4 = con.execute("SELECT * FROM videos WHERE number=4").fetchone()
     if v4:
         description4 = """Did someone ask for the 6-digit WhatsApp verification code sent to your phone?
@@ -44,8 +76,7 @@ REAL-LIFE IQ — Smarter Choices for Real Life."""
         hashtags4 = "#WhatsAppScam #VerificationCodeScam #WhatsAppSecurity #AccountTakeover #TextScam #ScamAwareness #OnlineSafety #CyberSafety #RealLifeIQ #Shorts"
         con.execute(
             """UPDATE videos
-               SET title=?, description=?, hashtags=?, problem=?, takeaway=?,
-                   status='Publishing Plan', updated_at=?
+               SET title=?, description=?, hashtags=?, problem=?, takeaway=?, updated_at=?
                WHERE id=?""",
             (
                 "WhatsApp Verification Code Scam: Never Share This 6-Digit Code! #Shorts",
@@ -57,15 +88,7 @@ REAL-LIFE IQ — Smarter Choices for Real Life."""
                 v4["id"],
             ),
         )
-        for key in ("problem", "slides", "voice", "final_video"):
-            con.execute(
-                "UPDATE stages SET status='Approved', approved_at=COALESCE(approved_at, ?) WHERE video_id=? AND stage_key=?",
-                (now, v4["id"], key),
-            )
-        con.execute(
-            "UPDATE stages SET status='In Review', approved_at=NULL WHERE video_id=? AND stage_key='publishing' AND status!='Approved'",
-            (v4["id"],),
-        )
+    mark_published(4)
 
     # Video #5 — Recovery companion. Create if needed, then keep its pre-production
     # publishing package populated so it can be reviewed before slides/audio/video.
