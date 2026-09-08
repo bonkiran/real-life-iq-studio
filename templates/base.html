@@ -3,34 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}REAL-LIFE IQ Studio{% endblock %}</title>
+  <title>{% block title %}Impact Content Studio{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
 </head>
 <body>
   <aside class="sidebar">
     <div class="brand">
       <div class="bulb">◉</div>
-      <div><strong>REAL-LIFE IQ</strong><span>Content Studio</span></div>
+      <div><strong>IMPACT</strong><span>Content Studio</span></div>
     </div>
     <nav>
-      <a class="{{ 'active' if request.url.path == '/' else '' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
-      <a class="{{ 'active' if request.url.path.startswith('/videos') else '' }}" href="{{ url_for('videos') }}">Videos</a>
+      <a class="{{ 'active' if request.url.path.startswith('/channels') else '' }}" href="{{ url_for('channels') }}">Channels</a>
+      <a class="{{ 'active' if request.url.path == '/idea-inbox' else '' }}" href="{{ url_for('idea_inbox') }}">Global Idea Inbox</a>
+      <a class="{{ 'active' if request.url.path == '/' else '' }}" href="{{ url_for('dashboard') }}">Production Dashboard</a>
+      <a class="{{ 'active' if request.url.path.startswith('/videos') else '' }}" href="{{ url_for('videos') }}">All Videos</a>
       <a class="{{ 'active' if request.url.path.startswith('/ideas') else '' }}" href="{{ url_for('ideas') }}">Idea Library</a>
       <a class="{{ 'active' if request.url.path.startswith('/sources') else '' }}" href="{{ url_for('sources') }}">Sources</a>
     </nav>
-    <div class="sidebar-note">V1 focuses on workflow, approvals, assets and publishing. YouTube analytics can connect later.</div>
+    <div class="sidebar-note">One workspace for every channel: ideas, research, production, publishing and analytics.</div>
   </aside>
   <main class="main">
     <header class="topbar">
       <div>
-        <h1>{% block page_title %}REAL-LIFE IQ Studio{% endblock %}</h1>
-        <p>{% block page_subtitle %}Smarter Choices for Real Life.{% endblock %}</p>
+        <h1>{% block page_title %}Impact Content Studio{% endblock %}</h1>
+        <p>{% block page_subtitle %}Create content that protects, teaches, strengthens and inspires.{% endblock %}</p>
       </div>
-      <div class="pill">Safety-first production system &nbsp;·&nbsp; <a href="{{ url_for('logout') }}">Sign out</a></div>
+      <div class="pill">Multi-channel operating system &nbsp;·&nbsp; <a href="{{ url_for('logout') }}">Sign out</a></div>
     </header>
 
     {% block content %}{% endblock %}
-    <footer>REAL-LIFE IQ Content Studio · {{ now_year }}</footer>
+    <footer>Impact Content Studio · {{ now_year }}</footer>
   </main>
 </body>
 </html>
