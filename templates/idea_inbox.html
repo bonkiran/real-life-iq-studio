@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Global Idea Inbox — Impact Content Studio{% endblock %}
+{% block page_title %}Global Idea Inbox{% endblock %}
+{% block page_subtitle %}Capture useful ideas immediately, even before we know which channel they belong to.{% endblock %}
+{% block content %}
+<div class="two-col">
+<section class="panel">
+  <div class="panel-head"><div><h2>Capture a thought</h2><p>Nothing gets lost. We can assign it to a channel later.</p></div></div>
+  <form class="editor" method="post" action="{{ url_for('new_inbox_idea') }}">
+    <label>Idea / working title<input name="title" required placeholder="Example: Animated series about handling failure"></label>
+    <label>What are you thinking?<textarea name="thought" rows="6" placeholder="Problem, audience, lesson, visual idea, why it may help people..."></textarea></label>
+    <label>Possible channel<select name="suggested_channel_id"><option value="">Not sure yet</option>{% for c in channels %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></label>
+    <button class="button">Save to global inbox</button>
+  </form>
+</section>
+<section class="panel focus-panel">
+  <div class="eyebrow">WHY THIS EXISTS</div>
+  <h2>Ideas first. Channel decision later.</h2>
+  <p>Any future idea that could educate, protect, strengthen or inspire people can be captured here without creating a new workbook, app or channel prematurely.</p>
+  <p>Once the concept is clear, assign it to an existing channel or create a new incubator channel.</p>
+</section>
+</div>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Inbox</h2><p>Newest ideas first.</p></div></div>
+  <div class="idea-grid">
+  {% for idea in ideas %}
+    <article class="idea-card">
+      <div class="idea-top"><span>#{{ idea.id }}</span><b>{{ idea.status }}</b></div>
+      <h3>{{ idea.title }}</h3>
+      {% if idea.thought %}<p>{{ idea.thought }}</p>{% endif %}
+      <div class="idea-meta">{% if idea.suggested_channel_name %}<span>Suggested: {{ idea.suggested_channel_name }}</span>{% endif %}<span>{{ idea.created_at[:10] }}</span></div>
+      {% if idea.status == 'Inbox' %}
+      <form method="post" action="{{ url_for('assign_inbox_idea', idea_id=idea.id) }}" style="display:flex;gap:7px;margin-top:12px">
+        <select name="channel_id" required style="flex:1;border:1px solid #cdd8e1;border-radius:8px;padding:8px"><option value="">Assign to channel…</option>{% for c in channels %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+        <button class="button small">Assign</button>
+      </form>
+      {% endif %}
+    </article>
+  {% else %}<p class="muted">The inbox is empty.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}
