@@ -234,9 +234,9 @@ def video_detail(request: Request, video_id: int):
 
 
 @app.post("/videos/{video_id}/update", name="update_video")
-def update_video(video_id:int, topic:str=Form(""), title:str=Form(""), description:str=Form(""), hashtags:str=Form(""), status:str=Form("Planning"), problem:str=Form(""), takeaway:str=Form(""), upload_date:str=Form(""), publish_date:str=Form(""), youtube_url:str=Form(""), pinned_comment:str=Form(""), notes:str=Form("")):
-    fields=[topic,title,description,hashtags,status,problem,takeaway,upload_date,publish_date,youtube_url,pinned_comment,notes]; vals=[x.strip() or None for x in fields]; now=datetime.now().isoformat(timespec="seconds")
-    con=db_connect(); con.execute("UPDATE videos SET topic=?,title=?,description=?,hashtags=?,status=?,problem=?,takeaway=?,upload_date=?,publish_date=?,youtube_url=?,pinned_comment=?,notes=?,updated_at=? WHERE id=?",(*vals,now,video_id)); con.commit(); con.close(); return RedirectResponse(url=f"/videos/{video_id}",status_code=303)
+def update_video(video_id:int, topic:str=Form(""), title:str=Form(""), description:str=Form(""), hashtags:str=Form(""), youtube_tags:str=Form(""), status:str=Form("Planning"), problem:str=Form(""), takeaway:str=Form(""), upload_date:str=Form(""), publish_date:str=Form(""), youtube_url:str=Form(""), pinned_comment:str=Form(""), notes:str=Form("")):
+    fields=[topic,title,description,hashtags,youtube_tags,status,problem,takeaway,upload_date,publish_date,youtube_url,pinned_comment,notes]; vals=[x.strip() or None for x in fields]; now=datetime.now().isoformat(timespec="seconds")
+    con=db_connect(); con.execute("UPDATE videos SET topic=?,title=?,description=?,hashtags=?,youtube_tags=?,status=?,problem=?,takeaway=?,upload_date=?,publish_date=?,youtube_url=?,pinned_comment=?,notes=?,updated_at=? WHERE id=?",(*vals,now,video_id)); con.commit(); con.close(); return RedirectResponse(url=f"/videos/{video_id}",status_code=303)
 
 
 @app.post("/videos/{video_id}/stages/{stage_key}", name="update_stage")
