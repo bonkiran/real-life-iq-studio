@@ -74,8 +74,10 @@
   </div>
 </section>
 
+{% include 'youtube_analytics_panel.html' %}
+
 <section class="panel">
-  <div class="panel-head"><div><h2>Manual metrics snapshots</h2><p>Use this for metrics not included in Phase 1, such as subscriber gain or Shorts retention.</p></div></div>
+  <div class="panel-head"><div><h2>Manual metrics snapshots</h2><p>Use this only for metrics the APIs do not expose directly, such as Shorts viewed-vs-swiped percentage.</p></div></div>
   <form class="metric-form" method="post" action="{{ url_for('add_metrics', video_id=video.id) }}">
     <input type="date" name="captured_at"><input type="number" name="views" placeholder="Views"><input type="number" name="likes" placeholder="Likes"><input type="number" name="comments" placeholder="Comments"><input type="number" name="subscribers" placeholder="Subs gained"><input type="number" step="0.1" name="avg_percent_viewed" placeholder="Avg % viewed"><input type="number" step="0.1" name="viewed_vs_swiped" placeholder="Viewed vs swiped %"><button class="button">Save snapshot</button>
   </form>
