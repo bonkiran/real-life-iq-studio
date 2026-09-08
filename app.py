@@ -26,8 +26,8 @@ PIPELINE = [
     ("problem", "Problem Definition"),
     ("slides", "Slides Verification"),
     ("voice", "Voice-over Verification"),
+    ("publishing", "Publishing Plan"),
     ("final_video", "Final Video"),
-    ("publishing", "Title / Description / Hashtags"),
     ("published", "Published"),
     ("metrics", "Metrics"),
 ]
