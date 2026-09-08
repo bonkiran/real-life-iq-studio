@@ -1,0 +1,111 @@
+<section class="panel">
+  <div class="panel-head"><div><h2>YouTube Studio Analytics</h2><p>Owner-only performance metrics from the YouTube Analytics API.</p></div></div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 10px">
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yta-engaged" style="display:block;font-size:24px">—</strong><span class="muted">Engaged views</span></div>
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yta-watch" style="display:block;font-size:24px">—</strong><span class="muted">Watch time (min)</span></div>
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yta-avd" style="display:block;font-size:24px">—</strong><span class="muted">Avg view duration</span></div>
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yta-avp" style="display:block;font-size:24px">—</strong><span class="muted">Avg % viewed</span></div>
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yta-shares" style="display:block;font-size:24px">—</strong><span class="muted">Shares</span></div>
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yta-subs" style="display:block;font-size:24px">—</strong><span class="muted">Subscribers gained</span></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px">
+    <a class="button" id="yta-connect" href="/youtube/oauth/connect?video_id={{ video.id }}" style="display:none">Connect YouTube Analytics</a>
+    <button type="button" class="button" id="yta-sync" style="display:none">Sync Studio Analytics</button>
+    <span class="muted" id="yta-status">Checking YouTube Analytics connection…</span>
+  </div>
+  <p class="muted" style="margin-top:12px">Phase 2 adds engaged views, watch time, average view duration, average % viewed, shares and subscriber gain/loss. YouTube does not expose the Shorts “viewed vs swiped away” percentage as a Targeted Analytics API metric, so that field remains manual.</p>
+</section>
+
+<script>
+(() => {
+  const videoId = {{ video.id }};
+  const statusEl = document.getElementById('yta-status');
+  const connectEl = document.getElementById('yta-connect');
+  const syncEl = document.getElementById('yta-sync');
+  const engagedEl = document.getElementById('yta-engaged');
+  const watchEl = document.getElementById('yta-watch');
+  const avdEl = document.getElementById('yta-avd');
+  const avpEl = document.getElementById('yta-avp');
+  const sharesEl = document.getElementById('yta-shares');
+  const subsEl = document.getElementById('yta-subs');
+
+  const fmt = (v) => Number(v || 0).toLocaleString();
+  const fixed = (v, digits=1) => v === null || v === undefined ? '—' : Number(v).toFixed(digits);
+  const duration = (seconds) => {
+    if (seconds === null || seconds === undefined) return '—';
+    const s = Math.round(Number(seconds));
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return m ? `${m}:${String(rem).padStart(2,'0')}` : `${rem}s`;
+  };
+
+  function renderLatest(latest) {
+    if (!latest) {
+      engagedEl.textContent = '—'; watchEl.textContent = '—'; avdEl.textContent = '—';
+      avpEl.textContent = '—'; sharesEl.textContent = '—'; subsEl.textContent = '—';
+      return;
+    }
+    engagedEl.textContent = fmt(latest.engaged_views);
+    watchEl.textContent = fixed(latest.estimated_minutes_watched, 1);
+    avdEl.textContent = duration(latest.average_view_duration);
+    avpEl.textContent = latest.average_view_percentage == null ? '—' : `${fixed(latest.average_view_percentage,1)}%`;
+    sharesEl.textContent = fmt(latest.shares);
+    subsEl.textContent = `${fmt(latest.subscribers_gained)}${Number(latest.subscribers_lost || 0) ? ' / -' + fmt(latest.subscribers_lost) : ''}`;
+  }
+
+  function renderStatus(data) {
+    renderLatest(data.latest);
+    if (!data.client_configured) {
+      connectEl.style.display = 'none';
+      syncEl.style.display = 'none';
+      statusEl.textContent = 'OAuth client setup is still required in Render.';
+      return;
+    }
+    if (!data.connected) {
+      connectEl.style.display = 'inline-block';
+      syncEl.style.display = 'none';
+      statusEl.textContent = 'Connect the REAL-LIFE IQ YouTube channel to unlock Studio analytics.';
+      return;
+    }
+    connectEl.style.display = 'none';
+    syncEl.style.display = 'inline-block';
+    const channel = data.channel_title ? `Connected: ${data.channel_title}. ` : 'Connected. ';
+    const persistence = data.persistent ? 'Connection is persistent.' : 'Connection is temporary until YOUTUBE_REFRESH_TOKEN is added to Render.';
+    statusEl.textContent = channel + persistence;
+    if (data.latest && data.latest.captured_at) {
+      statusEl.textContent += ` Last synced: ${data.latest.captured_at.replace('T',' ')}`;
+    }
+  }
+
+  async function loadStatus() {
+    try {
+      const r = await fetch(`/api/youtube-analytics/status?video_id=${videoId}`);
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || 'Could not load Studio analytics status.');
+      renderStatus(data);
+    } catch (e) {
+      statusEl.textContent = e.message || 'Could not load Studio analytics status.';
+    }
+  }
+
+  syncEl.addEventListener('click', async () => {
+    syncEl.disabled = true;
+    statusEl.textContent = 'Syncing owner analytics from YouTube…';
+    try {
+      const r = await fetch(`/api/youtube-analytics/${videoId}/sync`, {method:'POST'});
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || 'Studio analytics sync failed.');
+      renderLatest(data.latest);
+      statusEl.textContent = `Studio analytics synced: ${data.latest.captured_at.replace('T',' ')}`;
+    } catch (e) {
+      statusEl.textContent = e.message || 'Studio analytics sync failed.';
+    } finally {
+      syncEl.disabled = false;
+    }
+  });
+
+  loadStatus();
+})();
+</script>
