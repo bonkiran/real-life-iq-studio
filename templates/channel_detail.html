@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}{{ channel.name }} — Impact Content Studio{% endblock %}
+{% block page_title %}{{ channel.name }}{% endblock %}
+{% block page_subtitle %}{{ channel.tagline or channel.mission or 'Channel workspace' }}{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card"><span>Status</span><strong style="font-size:20px">{{ channel.status }}</strong></div>
+  <div class="stat-card"><span>Videos</span><strong>{{ videos|length }}</strong></div>
+  <div class="stat-card"><span>Published</span><strong>{{ videos|selectattr('status','equalto','Published')|list|length }}</strong></div>
+  <div class="stat-card"><span>Ideas</span><strong>{{ ideas|length }}</strong></div>
+</div>
+
+<div class="two-col wide-left">
+<section class="panel">
+  <div class="panel-head"><div><h2>Channel blueprint</h2><p>Purpose, audience, content rules and creative identity stay locked here.</p></div></div>
+  <form class="editor" method="post" action="{{ url_for('update_channel', channel_id=channel.id) }}">
+    <div class="form-grid"><label>Name<input name="name" value="{{ channel.name or '' }}"></label><label>Handle<input name="handle" value="{{ channel.handle or '' }}" placeholder="@handle"></label></div>
+    <div class="form-grid"><label>Status<select name="status">{% for x in ['Incubator','Planning','Active','Paused','Archived'] %}<option {{ 'selected' if channel.status==x else '' }}>{{ x }}</option>{% endfor %}</select></label><label>YouTube channel ID<input name="youtube_channel_id" value="{{ channel.youtube_channel_id or '' }}"></label></div>
+    <label>Mission<textarea name="mission" rows="3">{{ channel.mission or '' }}</textarea></label>
+    <label>Tagline<input name="tagline" value="{{ channel.tagline or '' }}"></label>
+    <label>Audience<textarea name="audience" rows="3">{{ channel.audience or '' }}</textarea></label>
+    <label>Content pillars<textarea name="content_pillars" rows="4">{{ channel.content_pillars or '' }}</textarea></label>
+    <label>Format strategy<textarea name="format_strategy" rows="4">{{ channel.format_strategy or '' }}</textarea></label>
+    <label>Language strategy<textarea name="language_strategy" rows="3">{{ channel.language_strategy or '' }}</textarea></label>
+    <label>Visual / animation style<textarea name="visual_style" rows="3">{{ channel.visual_style or '' }}</textarea></label>
+    <label>Source & copyright policy<textarea name="source_policy" rows="4">{{ channel.source_policy or '' }}</textarea></label>
+    <label>Channel notes<textarea name="notes" rows="4">{{ channel.notes or '' }}</textarea></label>
+    <button class="button">Save channel blueprint</button>
+  </form>
+</section>
+
+<div>
+<section class="panel">
+  <div class="panel-head"><div><h2>Start a video</h2><p>Creates the standard production workflow inside this channel.</p></div></div>
+  <form class="editor" method="post" action="{{ url_for('new_channel_video', channel_id=channel.id) }}">
+    <label>Working topic<input name="topic" required placeholder="Video topic"></label>
+    <button class="button">Create video</button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Add an idea</h2><p>Channel-specific idea backlog.</p></div></div>
+  <form class="editor" method="post" action="{{ url_for('new_channel_idea', channel_id=channel.id) }}">
+    <label>Idea title<input name="title" required></label>
+    <label>Hook<textarea name="hook" rows="2"></textarea></label>
+    <label>Core lesson / takeaway<textarea name="lesson" rows="2"></textarea></label>
+    <button class="button">Add to backlog</button>
+  </form>
+</section>
+</div>
+</div>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Videos</h2><p>Production and performance for this channel only.</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Topic</th><th>Status</th><th>Published</th><th>Latest views</th></tr></thead><tbody>
+  {% for v in videos %}
+    <tr><td>{{ v.channel_video_no or v.number }}</td><td><a href="{{ url_for('video_detail', video_id=v.id) }}"><strong>{{ v.topic }}</strong></a><small>{{ v.title or '' }}</small></td><td><span class="status {{ v.status|lower|replace(' ','-') }}">{{ v.status }}</span></td><td>{{ v.publish_date or '—' }}</td><td>{% if latest_metrics.get(v.id) %}{{ latest_metrics[v.id].views }}{% else %}—{% endif %}</td></tr>
+  {% else %}<tr><td colspan="5" class="muted">No videos yet. This channel is ready when you are.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Idea backlog</h2><p>Concepts can stay here for months before we decide to produce them.</p></div><a href="{{ url_for('idea_inbox') }}" class="button secondary small">Global Idea Inbox</a></div>
+  <div class="idea-grid">
+  {% for idea in ideas %}
+    <article class="idea-card"><div class="idea-top"><span>{{ idea.idea_id or 'Idea' }}</span><b>{{ idea.status or 'Backlog' }}</b></div><h3>{{ idea.working_title }}</h3>{% if idea.hook %}<p><strong>Hook:</strong> {{ idea.hook }}</p>{% endif %}{% if idea.safe_action %}<p><strong>Lesson:</strong> {{ idea.safe_action }}</p>{% endif %}<div class="idea-meta">{% if idea.pillar %}<span>{{ idea.pillar }}</span>{% endif %}{% if idea.series %}<span>{{ idea.series }}</span>{% endif %}</div></article>
+  {% else %}<p class="muted">No ideas yet.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}
