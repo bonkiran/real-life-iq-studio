@@ -9,16 +9,14 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data"))).resolve()
 DB_PATH = DATA_DIR / "studio.db"
-SEED_FILE = BASE_DIR / "seed" / "recovery_backlog.json"
+SEED_FILES = [
+    BASE_DIR / "seed" / "catalog.json",
+    BASE_DIR / "seed" / "recovery_backlog.json",
+]
 
 
 def sync_backlog() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    if not SEED_FILE.exists():
-        print(f"Backlog sync skipped: {SEED_FILE} not found")
-        return
-
-    payload = json.loads(SEED_FILE.read_text(encoding="utf-8"))
     now = datetime.now().isoformat(timespec="seconds")
 
     con = sqlite3.connect(DB_PATH)
@@ -43,36 +41,45 @@ def sync_backlog() -> None:
 
     ideas_added = 0
     sources_added = 0
+    files_loaded = 0
 
-    for row in payload.get("ideas", []):
-        before = con.total_changes
-        con.execute(
-            """INSERT OR IGNORE INTO ideas(
-                   idea_id,pillar,series,working_title,hook,problem,safe_action,
-                   audience,priority,score,status,source_name,source_url,notes,created_at
-               ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (
-                row.get("idea_id"), row.get("pillar"), row.get("series"),
-                row.get("working_title"), row.get("hook"), row.get("problem"),
-                row.get("safe_action"), row.get("audience"), row.get("priority"),
-                row.get("score"), row.get("status", "Backlog"), row.get("source_name"),
-                row.get("source_url"), row.get("notes"), now,
-            ),
-        )
-        if con.total_changes > before:
-            ideas_added += 1
+    for seed_file in SEED_FILES:
+        if not seed_file.exists():
+            print(f"Backlog seed skipped: {seed_file} not found")
+            continue
 
-    for row in payload.get("sources", []):
-        before = con.total_changes
-        con.execute(
-            "INSERT OR IGNORE INTO sources(name,authority,best_for,url,editorial_note) VALUES(?,?,?,?,?)",
-            (
-                row.get("name"), row.get("authority"), row.get("best_for"),
-                row.get("url"), row.get("editorial_note"),
-            ),
-        )
-        if con.total_changes > before:
-            sources_added += 1
+        payload = json.loads(seed_file.read_text(encoding="utf-8"))
+        files_loaded += 1
+
+        for row in payload.get("ideas", []):
+            before = con.total_changes
+            con.execute(
+                """INSERT OR IGNORE INTO ideas(
+                       idea_id,pillar,series,working_title,hook,problem,safe_action,
+                       audience,priority,score,status,source_name,source_url,notes,created_at
+                   ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    row.get("idea_id"), row.get("pillar"), row.get("series"),
+                    row.get("working_title"), row.get("hook"), row.get("problem"),
+                    row.get("safe_action"), row.get("audience"), row.get("priority"),
+                    row.get("score"), row.get("status", "Backlog"), row.get("source_name"),
+                    row.get("source_url"), row.get("notes"), now,
+                ),
+            )
+            if con.total_changes > before:
+                ideas_added += 1
+
+        for row in payload.get("sources", []):
+            before = con.total_changes
+            con.execute(
+                "INSERT OR IGNORE INTO sources(name,authority,best_for,url,editorial_note) VALUES(?,?,?,?,?)",
+                (
+                    row.get("name"), row.get("authority"), row.get("best_for"),
+                    row.get("url"), row.get("editorial_note"),
+                ),
+            )
+            if con.total_changes > before:
+                sources_added += 1
 
     con.commit()
     total_ideas = con.execute("SELECT COUNT(*) FROM ideas").fetchone()[0]
@@ -80,8 +87,8 @@ def sync_backlog() -> None:
     con.close()
 
     print(
-        f"Backlog sync complete: +{ideas_added} ideas, +{sources_added} sources "
-        f"(totals: {total_ideas} ideas, {total_sources} sources)."
+        f"Backlog sync complete: {files_loaded} seed files, +{ideas_added} ideas, "
+        f"+{sources_added} sources (totals: {total_ideas} ideas, {total_sources} sources)."
     )
 
 
