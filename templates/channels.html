@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Channels — Impact Content Studio{% endblock %}
+{% block page_title %}Channels{% endblock %}
+{% block page_subtitle %}One operating system for every YouTube channel, idea and production pipeline.{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card"><span>Channels</span><strong>{{ channels|length }}</strong></div>
+  <div class="stat-card"><span>Published videos</span><strong>{{ channels|sum(attribute='published_count') }}</strong></div>
+  <div class="stat-card"><span>Channel ideas</span><strong>{{ channels|sum(attribute='idea_count') }}</strong></div>
+  <div class="stat-card"><span>Global inbox</span><strong>{{ inbox_count }}</strong></div>
+</div>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Channel portfolio</h2><p>Keep each brand separate while sharing one research, production and analytics system.</p></div><a class="button secondary" href="{{ url_for('idea_inbox') }}">Global Idea Inbox</a></div>
+  <div class="channel-grid">
+  {% for c in channels %}
+    <a class="channel-card" href="{{ url_for('channel_detail', channel_id=c.id) }}">
+      <div class="channel-card-top"><span class="status {{ c.status|lower|replace(' ','-') }}">{{ c.status }}</span><small>{{ c.handle or 'Handle not created yet' }}</small></div>
+      <h2>{{ c.name }}</h2>
+      <p>{{ c.tagline or c.mission or '' }}</p>
+      <div class="channel-kpis"><span><b>{{ c.video_count }}</b> videos</span><span><b>{{ c.published_count }}</b> published</span><span><b>{{ c.idea_count }}</b> ideas</span></div>
+    </a>
+  {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Add a future channel</h2><p>Capture the concept now even if production will start later.</p></div></div>
+  <form class="editor" method="post" action="{{ url_for('new_channel') }}">
+    <div class="form-grid"><label>Channel name<input name="name" required placeholder="Example: Family Money IQ"></label><label>Optional slug<input name="slug" placeholder="family-money-iq"></label></div>
+    <label>Mission / purpose<textarea name="mission" rows="3" placeholder="What positive change should this channel create for viewers?"></textarea></label>
+    <button class="button">Create incubator channel</button>
+  </form>
+</section>
+{% endblock %}
