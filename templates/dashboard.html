@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-{% block page_title %}Dashboard{% endblock %}
-{% block page_subtitle %}Everything in one place: ideas, approvals, files, publishing and later analytics.{% endblock %}
+{% block page_title %}Production Dashboard{% endblock %}
+{% block page_subtitle %}Cross-channel view of production, publishing and tracked performance.{% endblock %}
 {% block content %}
 <div class="stats-grid">
   <div class="stat-card"><span>Total videos</span><strong>{{ videos|length }}</strong></div>
@@ -11,7 +11,7 @@
 
 <div class="two-col">
   <section class="panel">
-    <div class="panel-head"><div><h2>Production pipeline</h2><p>Approval gates keep each video organized.</p></div><a class="button secondary" href="{{ url_for('videos') }}">View all</a></div>
+    <div class="panel-head"><div><h2>Production pipeline</h2><p>Approval gates keep every video organized.</p></div><a class="button secondary" href="{{ url_for('videos') }}">View all</a></div>
     <div class="video-list">
     {% for v in videos %}
       <a class="video-row" href="{{ url_for('video_detail', video_id=v.id) }}">
@@ -24,7 +24,7 @@
   </section>
 
   <section class="panel focus-panel">
-    <div class="eyebrow">NEXT FOCUS</div>
+    <div class="eyebrow">NEXT PRODUCTION ITEM</div>
     {% if next_video %}
       <h2>#{{ next_video.number }} — {{ next_video.topic }}</h2>
       <p>{{ next_video.problem or 'Define the problem first, then move through the approval gates.' }}</p>
@@ -33,18 +33,18 @@
       <h2>All current videos are published</h2>
     {% endif %}
     <div class="mini-flow">
-      <span>Problem</span><b>→</b><span>Slides</span><b>→</b><span>Voice</span><b>→</b><span>Video</span><b>→</b><span>Publish</span>
+      <span>Problem</span><b>→</b><span>Slides</span><b>→</b><span>Voice</span><b>→</b><span>Publishing</span><b>→</b><span>Video</span><b>→</b><span>Publish</span>
     </div>
   </section>
 </div>
 
 <section class="panel">
-  <div class="panel-head"><div><h2>Channel analytics</h2><p>Placeholder for YouTube integration later.</p></div></div>
+  <div class="panel-head"><div><h2>Tracked YouTube performance</h2><p>Latest saved metrics across videos. Per-channel detail lives inside each channel workspace.</p></div><a class="button secondary" href="{{ url_for('channels') }}">Open channels</a></div>
   <div class="stats-grid mini">
     <div class="stat-card"><span>Views tracked</span><strong>{{ metric.views or 0 }}</strong></div>
     <div class="stat-card"><span>Likes tracked</span><strong>{{ metric.likes or 0 }}</strong></div>
     <div class="stat-card"><span>Comments tracked</span><strong>{{ metric.comments or 0 }}</strong></div>
-    <div class="stat-card"><span>Future connection</span><strong>YT</strong></div>
+    <div class="stat-card"><span>Connected platform</span><strong>YT</strong></div>
   </div>
 </section>
 {% endblock %}
