@@ -9,6 +9,7 @@ from urllib.parse import quote
 
 from fastapi import Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from youtube_metrics import install_youtube_metrics
 
 COOKIE_NAME = "rliq_studio_session"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -123,3 +124,5 @@ def install_auth(app, templates) -> None:
         response = RedirectResponse(url="/login", status_code=303)
         response.delete_cookie(COOKIE_NAME)
         return response
+
+    install_youtube_metrics(app)
