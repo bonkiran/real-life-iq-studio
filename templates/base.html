@@ -46,6 +46,23 @@
     el.innerHTML = `Channel: <a href="/channels/${data.channel_id}"><strong>${data.channel_name}</strong></a>${data.channel_video_no ? ` · Channel video #${data.channel_video_no}` : ''}`;
   }).catch(() => {});
 })();
+
+// Release dates use the Studio standard MM-DD-YYYY format.
+(() => {
+  const releaseDates = document.querySelectorAll('input[name="upload_date"], input[name="publish_date"]');
+  releaseDates.forEach((input) => {
+    const value = (input.value || '').trim();
+    input.type = 'text';
+    input.placeholder = 'MM-DD-YYYY';
+    input.inputMode = 'numeric';
+    input.pattern = '\\d{2}-\\d{2}-\\d{4}';
+    input.title = 'Use MM-DD-YYYY';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [yyyy, mm, dd] = value.split('-');
+      input.value = `${mm}-${dd}-${yyyy}`;
+    }
+  });
+})();
 </script>
 </body>
 </html>
