@@ -25,12 +25,13 @@
 
     <hr>
     <div class="eyebrow">PRE-PRODUCTION PUBLISHING PLAN</div>
-    <h3>2. Title, description & hashtags</h3>
+    <h3>2. Title, description, hashtags & tags</h3>
     <p class="muted">Prepare and review these before final-video assembly so the finished Short already has a complete publishing package.</p>
     <label>YouTube title<input name="title" value="{{ video.title or '' }}"></label>
     <label>Description<textarea name="description" rows="11">{{ video.description or '' }}</textarea></label>
     <label>Hashtags<textarea name="hashtags" rows="3">{{ video.hashtags or '' }}</textarea></label>
-    <label>Pinned comment<textarea name="pinned_comment" rows="3">{{ video.pinned_comment or '' }}</textarea></label>
+    <label>YouTube tags<textarea name="youtube_tags" rows="4" placeholder="Comma-separated YouTube Studio tags">{{ video.youtube_tags or '' }}</textarea></label>
+    <label>Pinned comment<textarea name="pinned_comment" rows="4">{{ video.pinned_comment or '' }}</textarea></label>
 
     <hr>
     <h3>3. Release details</h3>
