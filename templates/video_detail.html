@@ -24,8 +24,13 @@
     <label>Key takeaway<textarea name="takeaway" rows="2">{{ video.takeaway or '' }}</textarea></label>
 
     <hr>
+    <h3>2. Approved voice-over</h3>
+    <p class="muted">The exact approved narration used for the production record.</p>
+    <label>Voice-over script<textarea rows="8" readonly>{{ video.voice_over_text or '' }}</textarea></label>
+
+    <hr>
     <div class="eyebrow">PRE-PRODUCTION PUBLISHING PLAN</div>
-    <h3>2. Title, description, hashtags & tags</h3>
+    <h3>3. Title, description, hashtags & tags</h3>
     <p class="muted">Prepare and review these before final-video assembly so the finished Short already has a complete publishing package.</p>
     <label>YouTube title<input name="title" value="{{ video.title or '' }}"></label>
     <label>Description<textarea name="description" rows="11">{{ video.description or '' }}</textarea></label>
@@ -34,7 +39,7 @@
     <label>Pinned comment<textarea name="pinned_comment" rows="4">{{ video.pinned_comment or '' }}</textarea></label>
 
     <hr>
-    <h3>3. Release details</h3>
+    <h3>4. Release details</h3>
     <div class="form-grid"><label>Upload date<input type="date" name="upload_date" value="{{ video.upload_date or '' }}"></label><label>Publish date<input type="date" name="publish_date" value="{{ video.publish_date or '' }}"></label></div>
     <label>YouTube URL<input name="youtube_url" value="{{ video.youtube_url or '' }}" placeholder="Paste after publishing; automatic YouTube connection later"></label>
     <label>Production notes<textarea name="notes" rows="3">{{ video.notes or '' }}</textarea></label>
