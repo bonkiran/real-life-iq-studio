@@ -140,19 +140,19 @@ REAL-LIFE IQ — Smarter Choices for Real Life."""
 
     description5 = """Has your WhatsApp account been taken over?
 
-Here’s what to do first:
+If you still control your phone number, you may be able to reclaim your account by re-registering that same number in WhatsApp.
 
-✅ Open WhatsApp and re-register your phone number
+Here’s what to do:
 
+✅ Open WhatsApp and enter your phone number again
 ✅ Enter the new 6-digit verification code
-
-✅ Check Linked Devices and remove anything suspicious
-
-✅ Enable two-step verification
-
+✅ This re-registers the account and logs the attacker out
+✅ If you can’t receive texts or calls, contact your mobile carrier first
+✅ Check Linked Devices and remove anything unfamiliar
+✅ Turn on two-step verification
 ✅ Warn your contacts that your account was compromised
 
-Act quickly to regain control and protect your account.
+Act fast, reclaim it, and secure it.
 
 REAL-LIFE IQ — Smarter Choices for Real Life."""
     hashtags5 = "#WhatsAppHacked #WhatsAppRecovery #AccountRecovery #WhatsAppSecurity #AccountTakeover #ScamAwareness #CyberSafety #OnlineSafety #RealLifeIQ #Shorts"
