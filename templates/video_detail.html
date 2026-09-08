@@ -41,7 +41,7 @@
     <hr>
     <h3>4. Release details</h3>
     <div class="form-grid"><label>Upload date<input type="date" name="upload_date" value="{{ video.upload_date or '' }}"></label><label>Publish date<input type="date" name="publish_date" value="{{ video.publish_date or '' }}"></label></div>
-    <label>YouTube URL<input name="youtube_url" value="{{ video.youtube_url or '' }}" placeholder="Paste after publishing; automatic YouTube connection later"></label>
+    <label>YouTube URL<input name="youtube_url" value="{{ video.youtube_url or '' }}" placeholder="Paste the published YouTube Short URL; this powers automatic metrics sync"></label>
     <label>Production notes<textarea name="notes" rows="3">{{ video.notes or '' }}</textarea></label>
     <button class="button">Save production plan</button>
   </form>
@@ -58,7 +58,24 @@
 </section>
 
 <section class="panel">
-  <div class="panel-head"><div><h2>Metrics snapshots</h2><p>Manual now; YouTube connection can replace this later.</p></div></div>
+  <div class="panel-head"><div><h2>YouTube Metrics</h2><p>Pull public views, likes, comment count and recent public comments directly from YouTube.</p></div></div>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 16px">
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yt-views" style="display:block;font-size:24px">—</strong><span class="muted">Views</span></div>
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yt-likes" style="display:block;font-size:24px">—</strong><span class="muted">Likes</span></div>
+    <div style="padding:14px;border:1px solid var(--border,#dbe5ec);border-radius:12px"><strong id="yt-comment-count" style="display:block;font-size:24px">—</strong><span class="muted">Comments</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <button type="button" class="button" id="yt-sync-button">Sync YouTube Metrics</button>
+    <span class="muted" id="yt-sync-status">Checking connection…</span>
+  </div>
+  <div id="yt-comments-wrap" style="margin-top:18px">
+    <h3 style="margin-bottom:8px">Recent public comments</h3>
+    <div id="yt-comments"><p class="muted">No synced comments yet.</p></div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Manual metrics snapshots</h2><p>Use this for metrics not included in Phase 1, such as subscriber gain or Shorts retention.</p></div></div>
   <form class="metric-form" method="post" action="{{ url_for('add_metrics', video_id=video.id) }}">
     <input type="date" name="captured_at"><input type="number" name="views" placeholder="Views"><input type="number" name="likes" placeholder="Likes"><input type="number" name="comments" placeholder="Comments"><input type="number" name="subscribers" placeholder="Subs gained"><input type="number" step="0.1" name="avg_percent_viewed" placeholder="Avg % viewed"><input type="number" step="0.1" name="viewed_vs_swiped" placeholder="Viewed vs swiped %"><button class="button">Save snapshot</button>
   </form>
@@ -66,4 +83,101 @@
 </section>
 </div>
 </div>
+
+<script>
+(() => {
+  const videoId = {{ video.id }};
+  const viewsEl = document.getElementById('yt-views');
+  const likesEl = document.getElementById('yt-likes');
+  const commentCountEl = document.getElementById('yt-comment-count');
+  const statusEl = document.getElementById('yt-sync-status');
+  const commentsEl = document.getElementById('yt-comments');
+  const syncButton = document.getElementById('yt-sync-button');
+
+  const fmt = (value) => Number(value || 0).toLocaleString();
+
+  function renderComments(comments) {
+    commentsEl.innerHTML = '';
+    if (!comments || !comments.length) {
+      const empty = document.createElement('p');
+      empty.className = 'muted';
+      empty.textContent = 'No public comments returned yet.';
+      commentsEl.appendChild(empty);
+      return;
+    }
+    comments.forEach((comment) => {
+      const item = document.createElement('div');
+      item.style.padding = '10px 0';
+      item.style.borderBottom = '1px solid var(--border,#dbe5ec)';
+      const author = document.createElement('strong');
+      author.textContent = comment.author || 'YouTube user';
+      const text = document.createElement('div');
+      text.style.marginTop = '4px';
+      text.textContent = comment.text || '';
+      const meta = document.createElement('small');
+      meta.className = 'muted';
+      meta.style.display = 'block';
+      meta.style.marginTop = '4px';
+      meta.textContent = `${fmt(comment.like_count)} likes${comment.published_at ? ' · ' + comment.published_at.slice(0, 10) : ''}`;
+      item.append(author, text, meta);
+      commentsEl.appendChild(item);
+    });
+  }
+
+  function render(data) {
+    if (data.metric) {
+      viewsEl.textContent = fmt(data.metric.views);
+      likesEl.textContent = fmt(data.metric.likes);
+      commentCountEl.textContent = fmt(data.metric.comments);
+    } else {
+      viewsEl.textContent = '—';
+      likesEl.textContent = '—';
+      commentCountEl.textContent = '—';
+    }
+    renderComments(data.comments || []);
+
+    if (!data.api_configured) {
+      statusEl.textContent = 'YOUTUBE_API_KEY is not configured in Render.';
+    } else if (!data.youtube_video_id) {
+      statusEl.textContent = 'Paste the published YouTube URL under Release details and save it first.';
+    } else if (data.metric) {
+      const stamp = (data.metric.captured_at || '').replace('T', ' ');
+      statusEl.textContent = stamp ? `Last synced: ${stamp}` : 'Metrics synced.';
+    } else {
+      statusEl.textContent = 'Ready to sync.';
+    }
+  }
+
+  async function loadStatus() {
+    try {
+      const response = await fetch(`/api/youtube/${videoId}`);
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || 'Could not load YouTube metrics.');
+      render(data);
+    } catch (error) {
+      statusEl.textContent = error.message || 'Could not load YouTube metrics.';
+    }
+  }
+
+  syncButton.addEventListener('click', async () => {
+    syncButton.disabled = true;
+    statusEl.textContent = 'Syncing with YouTube…';
+    try {
+      const response = await fetch(`/api/youtube/${videoId}/sync`, {method: 'POST'});
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || 'YouTube sync failed.');
+      render({...data, api_configured: true});
+      if (data.comment_warning) {
+        statusEl.textContent = `Metrics synced. Public comments were unavailable: ${data.comment_warning}`;
+      }
+    } catch (error) {
+      statusEl.textContent = error.message || 'YouTube sync failed.';
+    } finally {
+      syncButton.disabled = false;
+    }
+  });
+
+  loadStatus();
+})();
+</script>
 {% endblock %}
