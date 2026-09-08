@@ -28,6 +28,7 @@
       <div>
         <h1>{% block page_title %}Impact Content Studio{% endblock %}</h1>
         <p>{% block page_subtitle %}Create content that protects, teaches, strengthens and inspires.{% endblock %}</p>
+        <div id="channel-context" class="muted" style="margin-top:7px"></div>
       </div>
       <div class="pill">Multi-channel operating system &nbsp;·&nbsp; <a href="{{ url_for('logout') }}">Sign out</a></div>
     </header>
@@ -35,5 +36,16 @@
     {% block content %}{% endblock %}
     <footer>Impact Content Studio · {{ now_year }}</footer>
   </main>
+<script>
+(() => {
+  const match = window.location.pathname.match(/^\/videos\/(\d+)$/);
+  if (!match) return;
+  fetch(`/api/content/video/${match[1]}/channel`).then(r => r.ok ? r.json() : null).then(data => {
+    if (!data || !data.channel_name) return;
+    const el = document.getElementById('channel-context');
+    el.innerHTML = `Channel: <a href="/channels/${data.channel_id}"><strong>${data.channel_name}</strong></a>${data.channel_video_no ? ` · Channel video #${data.channel_video_no}` : ''}`;
+  }).catch(() => {});
+})();
+</script>
 </body>
 </html>
