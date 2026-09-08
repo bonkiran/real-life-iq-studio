@@ -13,6 +13,7 @@ from youtube_metrics import install_youtube_metrics
 from youtube_analytics import install_youtube_analytics
 from content_hub import install_content_hub
 from publication_state_sync import sync_confirmed_publications
+from mahabharata_priority_sync import sync_mahabharata_launch
 
 COOKIE_NAME = "rliq_studio_session"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -80,6 +81,7 @@ def install_auth(app, templates) -> None:
         if path == "/health" or path.startswith("/static/") or path in {"/login", "/logout", "/youtube/oauth/callback"}:
             return await call_next(request)
         sync_confirmed_publications()
+        sync_mahabharata_launch()
         if not _password():
             return _setup_required()
         if not _valid_token(request.cookies.get(COOKIE_NAME)):
