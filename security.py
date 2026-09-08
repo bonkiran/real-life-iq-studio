@@ -10,6 +10,7 @@ from urllib.parse import quote
 from fastapi import Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from youtube_metrics import install_youtube_metrics
+from youtube_analytics import install_youtube_analytics
 
 COOKIE_NAME = "rliq_studio_session"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -74,7 +75,7 @@ def install_auth(app, templates) -> None:
     @app.middleware("http")
     async def studio_auth(request: Request, call_next):
         path = request.url.path
-        if path == "/health" or path.startswith("/static/") or path in {"/login", "/logout"}:
+        if path == "/health" or path.startswith("/static/") or path in {"/login", "/logout", "/youtube/oauth/callback"}:
             return await call_next(request)
         if not _password():
             return _setup_required()
@@ -126,3 +127,4 @@ def install_auth(app, templates) -> None:
         return response
 
     install_youtube_metrics(app)
+    install_youtube_analytics(app)
