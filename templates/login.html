@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign in · REAL-LIFE IQ Studio</title>
+  <title>Sign in · Impact Content Studio</title>
   <style>
     :root{--navy:#102a43;--blue:#163a5f;--gold:#f2b84b;--muted:#9fb5c8;--white:#fff;--line:#2a4d69}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at top,#163a5f 0,#102a43 42%,#081a2b 100%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#edf5fb}
@@ -13,19 +13,19 @@
 </head>
 <body>
   <div class="shell">
-    <div class="brand"><div class="bulb">◉</div><div><strong>REAL-LIFE IQ</strong><span>Content Studio</span></div></div>
+    <div class="brand"><div class="bulb">◉</div><div><strong>IMPACT</strong><span>Content Studio</span></div></div>
     <div class="card">
       <h1>Sign in</h1>
-      <p class="sub">Private production workspace for ideas, approvals, assets and publishing.</p>
+      <p class="sub">Private multi-channel workspace for ideas, research, production, publishing and analytics.</p>
       {% if error %}<div class="error">{{ error }}</div>{% endif %}
       <form method="post" action="/login">
         <input type="hidden" name="next" value="{{ next }}">
         <label>Username<input name="username" autocomplete="username" value="{{ username }}" required></label>
         <label>Password<input type="password" name="password" autocomplete="current-password" autofocus required></label>
-        <button type="submit">Enter Content Studio</button>
+        <button type="submit">Enter Impact Content Studio</button>
       </form>
     </div>
-    <div class="note">REAL-LIFE IQ · Safety-first production system</div>
+    <div class="note">One operating system for all of your YouTube channels</div>
   </div>
 </body>
 </html>
