@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}#{{ video.number }} {{ video.topic }} — REAL-LIFE IQ Studio{% endblock %}
 {% block page_title %}#{{ video.number }} — {{ video.topic }}{% endblock %}
-{% block page_subtitle %}Move through each gate only after the previous stage is approved.{% endblock %}
+{% block page_subtitle %}Review the full plan here before final-video assembly: story → slides → voice → publishing plan → video.{% endblock %}
 {% block content %}
 <div class="stage-strip">
 {% for s in stages %}
@@ -16,19 +16,28 @@
 
 <div class="two-col wide-left">
 <section class="panel">
-  <div class="panel-head"><div><h2>Video record</h2><p>Problem, publishing package and production notes.</p></div></div>
+  <div class="panel-head"><div><h2>Video production plan</h2><p>Everything needed to create and publish this Short is kept in one record.</p></div></div>
   <form class="editor" method="post" action="{{ url_for('update_video', video_id=video.id) }}">
-    <div class="form-grid"><label>Topic<input name="topic" value="{{ video.topic or '' }}"></label><label>Status<select name="status">{% for x in ['Planning','Problem Definition','Slides In Review','Voice In Review','Final Ready','Published'] %}<option {{ 'selected' if video.status==x else '' }}>{{ x }}</option>{% endfor %}</select></label></div>
+    <h3>1. Story & strategy</h3>
+    <div class="form-grid"><label>Topic<input name="topic" value="{{ video.topic or '' }}"></label><label>Status<select name="status">{% for x in ['Planning','Problem Definition','Slides Verification','Voice-over Verification','Publishing Plan','Final Ready','Published'] %}<option {{ 'selected' if video.status==x else '' }}>{{ x }}</option>{% endfor %}</select></label></div>
     <label>Problem we are trying to solve<textarea name="problem" rows="4">{{ video.problem or '' }}</textarea></label>
     <label>Key takeaway<textarea name="takeaway" rows="2">{{ video.takeaway or '' }}</textarea></label>
-    <label>Final title<input name="title" value="{{ video.title or '' }}"></label>
-    <label>Description<textarea name="description" rows="9">{{ video.description or '' }}</textarea></label>
-    <label>Hashtags<textarea name="hashtags" rows="2">{{ video.hashtags or '' }}</textarea></label>
+
+    <hr>
+    <div class="eyebrow">PRE-PRODUCTION PUBLISHING PLAN</div>
+    <h3>2. Title, description & hashtags</h3>
+    <p class="muted">Prepare and review these before final-video assembly so the finished Short already has a complete publishing package.</p>
+    <label>YouTube title<input name="title" value="{{ video.title or '' }}"></label>
+    <label>Description<textarea name="description" rows="11">{{ video.description or '' }}</textarea></label>
+    <label>Hashtags<textarea name="hashtags" rows="3">{{ video.hashtags or '' }}</textarea></label>
+    <label>Pinned comment<textarea name="pinned_comment" rows="3">{{ video.pinned_comment or '' }}</textarea></label>
+
+    <hr>
+    <h3>3. Release details</h3>
     <div class="form-grid"><label>Upload date<input type="date" name="upload_date" value="{{ video.upload_date or '' }}"></label><label>Publish date<input type="date" name="publish_date" value="{{ video.publish_date or '' }}"></label></div>
-    <label>YouTube URL<input name="youtube_url" value="{{ video.youtube_url or '' }}" placeholder="Connect later or paste after publishing"></label>
-    <label>Pinned comment<textarea name="pinned_comment" rows="2">{{ video.pinned_comment or '' }}</textarea></label>
-    <label>Notes<textarea name="notes" rows="3">{{ video.notes or '' }}</textarea></label>
-    <button class="button">Save video record</button>
+    <label>YouTube URL<input name="youtube_url" value="{{ video.youtube_url or '' }}" placeholder="Paste after publishing; automatic YouTube connection later"></label>
+    <label>Production notes<textarea name="notes" rows="3">{{ video.notes or '' }}</textarea></label>
+    <button class="button">Save production plan</button>
   </form>
 </section>
 
