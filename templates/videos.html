@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block page_title %}Videos{% endblock %}
-{% block page_subtitle %}One workspace per video, with the full production history.{% endblock %}
+{% block page_title %}All Videos{% endblock %}
+{% block page_subtitle %}Cross-channel production library. Start new videos from the appropriate channel workspace.{% endblock %}
 {% block content %}
 <div class="panel">
-  <div class="panel-head"><div><h2>Video library</h2><p>Published, in production and planned videos.</p></div>
-    <form class="inline-form" method="post" action="{{ url_for('new_video') }}"><input name="topic" placeholder="New video topic" required><button class="button">+ Add video</button></form>
+  <div class="panel-head"><div><h2>Video library</h2><p>Published, in production and planned videos across the portfolio.</p></div>
+    <a class="button" href="{{ url_for('channels') }}">Choose channel to add video</a>
   </div>
   <div class="table-wrap"><table>
-    <thead><tr><th>#</th><th>Topic</th><th>Current gate</th><th>Status</th><th>Publish date</th><th></th></tr></thead>
+    <thead><tr><th>Internal #</th><th>Topic</th><th>Current gate</th><th>Status</th><th>Publish date</th><th></th></tr></thead>
     <tbody>{% for v in videos %}<tr>
       <td>{{ v.number }}</td><td><strong>{{ v.topic }}</strong><small>{{ v.title or 'Title not finalized' }}</small></td><td>{{ stage_info[v.id] }}</td><td><span class="status {{ v.status|lower|replace(' ','-') }}">{{ v.status }}</span></td><td>{{ v.publish_date or '—' }}</td><td><a href="{{ url_for('video_detail', video_id=v.id) }}">Open →</a></td>
     </tr>{% endfor %}</tbody>
