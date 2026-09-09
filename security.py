@@ -16,6 +16,7 @@ from publication_state_sync import sync_confirmed_publications
 from mahabharata_priority_sync import sync_mahabharata_launch
 from wisdom_epics_sync import sync_wisdom_epics
 from wisdom_epics_publication_sync import sync_wisdom_epics_publications
+from wisdom_epics_playbook_sync import sync_wisdom_epics_playbook
 
 COOKIE_NAME = "rliq_studio_session"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -86,6 +87,7 @@ def install_auth(app, templates) -> None:
         sync_mahabharata_launch()
         sync_wisdom_epics()
         sync_wisdom_epics_publications()
+        sync_wisdom_epics_playbook()
         if not _password():
             return _setup_required()
         if not _valid_token(request.cookies.get(COOKIE_NAME)):
