@@ -42,6 +42,7 @@ def sync_whatsapp_series(db_connect, ensure_stages):
         9: ("AI Voice-Cloning Emergency Call Scam", "“Mom, I’m in Trouble!” — Could That Voice Be AI? #Shorts", "09-08-2026"),
         10: ("FTC Scam Watch — Latest FTC Data Available", "FTC Scam Watch: $15.9 Billion Reported Lost to Fraud #Shorts", "09-08-2026"),
         11: ("WhatsApp Investment Group — Social Proof Scam", "WhatsApp Investment Group Full of “Winners”? Watch These Red Flags #Shorts", "09-08-2026"),
+        12: ("Phone Stolen — Recover, Reclaim & Restore", "Phone Stolen? Do These 5 Things NOW Before They Access Your Accounts #Shorts", "09-09-2026"),
     }
 
     def get_or_create(number, topic):
@@ -156,6 +157,29 @@ def sync_whatsapp_series(db_connect, ensure_stages):
             v11["id"],
         ),
     )
+
+    v12 = con.execute("SELECT id FROM videos WHERE number=12").fetchone()
+    con.execute(
+        """UPDATE videos SET description=?, hashtags=?, youtube_tags=?,
+           pinned_comment=?, problem=?, takeaway=?, notes=?, updated_at=?
+           WHERE id=?""",
+        (
+            "Your phone is gone. What you do next can protect your money, accounts, identity, and memories.\n\nIf your phone is lost or stolen:\n✅ Locate and lock it immediately using Find My on iPhone or Find Hub on Android\n✅ Call your mobile carrier and block or replace the SIM/eSIM\n✅ Secure your email first — it may control password resets for your other accounts\n✅ Check banking, credit/debit cards, digital wallets, and payment apps for suspicious activity\n✅ Review logged-in sessions and remove devices you don’t recognize\n\nThen secure your accounts before worrying about replacing the phone.\n\nPrepare BEFORE it happens:\n• Write down your IMEI and serial number somewhere outside your phone\n• Keep photos and important data backed up to the cloud\n• Make sure Find My iPhone / Find Hub is enabled and working\n\nA phone today can contain access to your email, bank accounts, payment apps, photos, identity, and years of memories.\n\nPrepare now. Recover faster later.\n\nREAL-LIFE IQ — Verify first. Act second.",
+            "#PhoneStolen #LostPhone #iPhoneStolen #AndroidLost #FindMyiPhone #FindHub #PhoneSecurity #IdentityTheft #CyberSafety #OnlineSafety #RealLifeIQ #Shorts",
+            "phone stolen, stolen phone what to do, lost phone what to do, phone theft, iPhone stolen, Android phone stolen, Find My iPhone, Android Find Hub, lock stolen phone, stolen SIM, block SIM card, eSIM stolen phone, phone account security, lost phone recovery, secure email account, digital wallet security, mobile banking security, IMEI number, phone serial number, cloud backup, phone theft prevention, cyber safety, identity theft prevention, Real Life IQ",
+            "If your phone disappeared right now, could you recover everything on it?\n\nBefore it happens, make sure you have:\n✅ Your IMEI + serial number saved somewhere else\n✅ Cloud backup turned on\n✅ Find My / Find Hub enabled and tested\n\nAnd if the phone is stolen:\nLock the phone → Block the SIM → Secure email → Check your money/accounts → Replace the phone later.\n\nYour phone can be replaced. Your accounts, money, identity, and memories may be much harder to recover.\n\nREAL-LIFE IQ — Verify first. Act second.",
+            "A stolen phone can expose far more than the device itself: email, password resets, phone-number-based authentication, banking, digital wallets, payment apps, identity data, and irreplaceable photos or memories.",
+            "Act fast: locate and lock the phone, block the SIM/eSIM, secure email, review financial accounts and sessions, then replace the phone. Before any loss happens, save the IMEI/serial number externally, enable cloud backup, and verify Find My or Find Hub is working.",
+            "Published 09-09-2026. #12 Recover • Reclaim • Restore series — Phone Stolen. Final approved video uses 7 slides, 1080x1920 vertical, 30 FPS, 115.8 seconds. Slide transitions were synchronized to the final uploaded narration and the embedded audio matched the source MP3 at approximately 0.99995 waveform correlation.",
+            now,
+            v12["id"],
+        ),
+    )
+
+    # Keep the matching recovery-backlog idea aligned with production status.
+    idea_tables = {row["name"] for row in con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+    if "ideas" in idea_tables:
+        con.execute("UPDATE ideas SET status='Published' WHERE idea_id='P061'")
 
     con.commit()
     con.close()
