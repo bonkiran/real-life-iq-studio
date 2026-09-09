@@ -14,6 +14,7 @@ from youtube_analytics import install_youtube_analytics
 from content_hub import install_content_hub
 from publication_state_sync import sync_confirmed_publications
 from mahabharata_priority_sync import sync_mahabharata_launch
+from wisdom_epics_sync import sync_wisdom_epics
 
 COOKIE_NAME = "rliq_studio_session"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -82,6 +83,7 @@ def install_auth(app, templates) -> None:
             return await call_next(request)
         sync_confirmed_publications()
         sync_mahabharata_launch()
+        sync_wisdom_epics()
         if not _password():
             return _setup_required()
         if not _valid_token(request.cookies.get(COOKIE_NAME)):
