@@ -41,6 +41,7 @@ def sync_whatsapp_series(db_connect, ensure_stages):
         8: ("ATM Skimmer Warning", "ATM Skimmer Warning: Check This Before You Insert Your Card #Shorts", "09-08-2026"),
         9: ("AI Voice-Cloning Emergency Call Scam", "“Mom, I’m in Trouble!” — Could That Voice Be AI? #Shorts", "09-08-2026"),
         10: ("FTC Scam Watch — Latest FTC Data Available", "FTC Scam Watch: $15.9 Billion Reported Lost to Fraud #Shorts", "09-08-2026"),
+        11: ("WhatsApp Investment Group — Social Proof Scam", "WhatsApp Investment Group Full of “Winners”? Watch These Red Flags #Shorts", "09-08-2026"),
     }
 
     def get_or_create(number, topic):
@@ -135,6 +136,24 @@ def sync_whatsapp_series(db_connect, ensure_stages):
             "Published 09-08-2026. FTC Scam Watch #10. Final video 1080x1920, 75.37 seconds, 30 FPS, H.264 + AAC. Full six-slide video and uploaded MP3 validated.",
             now,
             v10["id"],
+        ),
+    )
+
+    v11 = con.execute("SELECT id FROM videos WHERE number=11").fetchone()
+    con.execute(
+        """UPDATE videos SET description=?, hashtags=?, youtube_tags=?,
+           pinned_comment=?, problem=?, takeaway=?, notes=?, updated_at=?
+           WHERE id=?""",
+        (
+            "A WhatsApp investment group can look convincing. Dozens of members may appear to post profits, withdrawals, and success stories. But stop and ask: who are these people? Scammers can create fake profiles, fake testimonials, fake profit screenshots, and fake withdrawal stories to create social proof and pressure you to invest.\n\nBefore sending money or crypto:\n✅ Verify the investment independently\n✅ Check who actually runs the group\n✅ Ask the group admin direct questions\n✅ Verify the advisor's identity and credentials\n✅ Be suspicious of guaranteed or unusually consistent returns\n✅ Never send money simply because strangers claim they are winning\n\nDon’t trust the crowd. Verify the authenticity outside the WhatsApp group. Ask the right questions. Protect your hard-earned money.\n\nREAL-LIFE IQ — Verify first. Act second.",
+            "#WhatsAppScam #InvestmentScam #CryptoScam #InvestmentFraud #ScamAwareness #FraudPrevention #OnlineSafety #WhatsApp #RealLifeIQ #Shorts",
+            "WhatsApp investment scam, WhatsApp investment group, WhatsApp scam, investment scam, fake investment group, fake investment profits, fake testimonials, investment fraud, crypto scam, social proof scam, fake trading group, WhatsApp trading scam, guaranteed returns scam, scam awareness, fraud prevention, online safety, Real Life IQ",
+            "A group full of “winners” does NOT prove the investment is real.\n\nFake profiles, fake withdrawals, and fake success stories can all be used to build trust.\n\nBefore investing: Verify the people. Verify the investment. Ask questions. Never send money because strangers say they won.\n\nREAL-LIFE IQ — Verify first. Act second.",
+            "A WhatsApp investment group can manufacture social proof using fake members, fake testimonials, fake withdrawals, and pressure tactics to make an investment appear legitimate.",
+            "Do not trust the crowd. Verify the investment and the people independently outside the WhatsApp group, ask the group admin direct questions, and never invest hard-earned money because strangers claim they won.",
+            "Published 09-08-2026. #11 WhatsApp Investment Group social-proof scam. Final video 1080x1920, 56.42 seconds, 30 FPS, H.264 + AAC. All 6 slides validated. Final audio closely matched uploaded MP3 with waveform correlation about 0.99995.",
+            now,
+            v11["id"],
         ),
     )
 
