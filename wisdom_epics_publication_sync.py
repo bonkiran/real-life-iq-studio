@@ -99,6 +99,73 @@ Pinned comment saved with the publication package.
 Textual caution retained: the narration says 'In the traditional telling' for the endless-sari sequence because details vary across textual traditions and retellings.
 Current gate: Metrics / post-publication performance review."""
 
+V4_TITLE = "The Yaksha Asked Yudhishthira One Impossible Question #Shorts"
+V4_TOPIC = "Yaksha’s Questions to Yudhishthira"
+V4_DESCRIPTION = """During their exile, the Pandavas were led deep into the forest. Exhausted and thirsty, Nakula discovered a beautiful lake—but a mysterious voice warned him not to drink before answering its questions.
+
+One by one, Nakula, Sahadeva, Arjuna, and Bhima ignored the warning and fell.
+
+When Yudhishthira arrived, he did something different: he stopped and listened.
+
+The Yaksha tested him with questions about happiness, mortality, wisdom, and dharma. But the greatest test came when Yudhishthira was allowed to choose only one brother to revive.
+
+He chose Nakula—not Bhima or Arjuna—so that both Kunti and Madri would each still have a living son.
+
+True wisdom is not just knowing what is right. It is choosing what is right when the choice costs you something.
+
+Wisdom of Epics
+Ancient epic. Modern strength. Timeless wisdom.
+
+Based on the Yaksha Prashna episode of the Mahabharata, Vana Parva."""
+V4_HASHTAGS = "#YakshaPrashna #Yudhishthira #Mahabharata #Pandavas #Dharma #IndianEpics #AncientWisdom #LifeLessons #Mythology #WisdomOfEpics #Shorts"
+V4_TAGS = "Yaksha Prashna, Yaksha questions, Yudhishthira, Yudhishthira wisdom, Mahabharata, Pandavas, Nakula, Bhima, Arjuna, Sahadeva, Dharma, Mahabharata stories, Indian mythology, Indian epics, greatest wonder question, contentment, wisdom, life lessons, moral stories, ancient wisdom, Wisdom of Epics"
+V4_VOICE = """During their exile, a mysterious deer drew the Pandavas deep into the forest. Exhausted and thirsty, they sent Nakula to find water.
+
+At a beautiful lake, a mysterious voice warned him: answer my questions before you drink.
+
+Nakula ignored the warning and fell. One by one, Sahadeva, Arjuna, and Bhima did the same.
+
+When Yudhishthira arrived, he found all four brothers lying still. But unlike them, he stopped—and listened.
+
+The Yaksha began testing his wisdom.
+
+What is the greatest happiness?
+
+Contentment.
+
+What is the greatest wonder?
+
+Yudhishthira answered: Every day we see others die, yet we live as though we ourselves will never die.
+
+Finally, the Yaksha offered to revive one brother.
+
+Yudhishthira chose Nakula—not mighty Bhima or Arjuna—so that both Kunti and Madri would each still have a living son.
+
+Pleased by his fairness, the Yaksha revealed himself as Dharma and restored all four brothers.
+
+True wisdom is not just knowing what is right. It is choosing what is right when the choice costs you something.
+
+Wisdom of Epics."""
+V4_PROBLEM = "The Yaksha tests whether wisdom is merely knowledge or whether Yudhishthira can remain calm, listen, and act fairly when the decision carries a personal cost."
+V4_TAKEAWAY = "True wisdom is not just knowing what is right. It is choosing what is right when the choice costs you something."
+V4_PINNED = """The Yaksha tested Yudhishthira’s knowledge—but his hardest test was a choice.
+
+He could revive only one brother. He chose Nakula so that both Kunti and Madri would each still have a living son.
+
+What do you think mattered more in that moment—wisdom, fairness, or sacrifice?
+
+Wisdom of Epics — Ancient epic. Modern strength. Timeless wisdom."""
+V4_NOTES = """Published as Wisdom of Epics Video #4 on 2026-09-09.
+Source concept: MHB-005 — Yaksha’s Questions to Yudhishthira / Yaksha Prashna.
+Final creator-approved render: Wisdom_of_Epics_04_Yaksha_Prashna_FINAL.mp4.
+Validated master: 1080x1920, true 9:16, 30 fps, H.264 video, AAC audio, duration 65.23 seconds.
+Visual format: premium illustrated storytelling with mythical forest-green and antique-gold caption panels; clean full-frame vertical scenes with no neighboring-slide bleed.
+Voice-over: creator-supplied Indian voice MP3, technically validated before final render.
+YouTube AI/synthetic-content disclosure: Yes.
+Pinned comment, title, description, hashtags and search tags saved with the publication package.
+Narrative emphasis: Yudhishthira succeeds first by stopping to listen, then proves his wisdom through the fair choice of Nakula; Dharma restores all four brothers.
+Current gate: Metrics / post-publication performance review."""
+
 
 def _columns(con: sqlite3.Connection, table: str) -> set[str]:
     return {row["name"] for row in con.execute(f"PRAGMA table_info({table})").fetchall()}
@@ -241,6 +308,24 @@ def sync_wisdom_epics_publications() -> None:
             notes=V3_NOTES,
             idea_id="MHB-003",
             published_priority="Published #3",
+            now=now,
+        )
+
+        _publish_video(
+            con,
+            channel_video_no=4,
+            topic=V4_TOPIC,
+            title=V4_TITLE,
+            description=V4_DESCRIPTION,
+            hashtags=V4_HASHTAGS,
+            problem=V4_PROBLEM,
+            takeaway=V4_TAKEAWAY,
+            voice=V4_VOICE,
+            tags=V4_TAGS,
+            pinned=V4_PINNED,
+            notes=V4_NOTES,
+            idea_id="MHB-005",
+            published_priority="Published #4",
             now=now,
         )
 
