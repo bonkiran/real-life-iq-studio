@@ -86,8 +86,8 @@ def install_auth(app, templates) -> None:
         sync_confirmed_publications()
         sync_mahabharata_launch()
         sync_wisdom_epics()
-        sync_wisdom_epics_publications()
         sync_wisdom_epics_playbook()
+        sync_wisdom_epics_publications()
         if not _password():
             return _setup_required()
         if not _valid_token(request.cookies.get(COOKIE_NAME)):
