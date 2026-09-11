@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python backlog_sync.py && python -c "import app; from published_sync import sync_published; sync_published()" && uvicorn app:app --host 0.0.0.0 --port $PORT
+    startCommand: python backlog_sync.py && python -c "import app; from published_sync import sync_published; sync_published(); from latest_status_sync import sync_latest_status; sync_latest_status()" && uvicorn app:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: STUDIO_USERNAME
