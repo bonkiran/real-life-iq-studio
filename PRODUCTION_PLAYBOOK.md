@@ -6,11 +6,11 @@ The goal is simple: the user should be reviewing creative choices, not catching 
 
 ## Standard production order
 
-Research → problem/trigger → narration → storyboard → continuity → slide generation + internal QA → voice QA → final video QA → upload package → status update.
+Research → problem/trigger → narration → storyboard → continuity → slide generation + internal QA → voice QA → final video assembly → viewer playback QA → final render integrity QA → upload package → status update.
 
 Do not skip ahead unless the exception is explicitly documented.
 
-## The 10 checkpoints
+## The 12 checkpoints
 
 ### 1. Story Lock Before Generation
 Research the topic, define the problem/trigger, lock the narration intent, and approve the shot-by-shot storyboard before final image generation starts.
@@ -77,6 +77,8 @@ Do not force a long narration block onto one slide.
 
 For Shorts, target a meaningful visual change roughly every **3–5 seconds** when the story supports it. Longer holds require an intentional reason.
 
+Motion must be intentional. Do not use bounce, zoom-settle-bounce, repeated Ken Burns motion, or other decorative animation that distracts from the story.
+
 ### 9. Reusable Approved Shot Library
 Build and reuse approved scene patterns for recurring situations such as:
 - driving / rear-view awareness
@@ -95,13 +97,62 @@ Reuse the composition logic while adapting the character and story.
 ### 10. End-to-End Pipeline Discipline
 Do not begin a downstream production stage until its prerequisite is approved, unless the exception is documented.
 
-Every video must be updated in the living QC tracker against all 10 checkpoints.
+Every video must be updated in the living QC tracker against all checkpoints.
+
+### 11. Viewer Playback Validation
+Watch the **complete final rendered video from start to finish exactly like a viewer would** before sending it for approval.
+
+The narration is the master timeline. Confirm:
+- every spoken sentence has the correct visual
+- no visual appears too early or too late
+- no wrong slide is shown for the narration
+- no slide is repeated unintentionally
+- no bounce or unnecessary motion remains
+- transitions feel natural
+- the ending progresses rather than repeating a prior visual
+- the story remains coherent from beginning to end
+
+A contact sheet, transition sampling, metadata check, or partial preview does **not** replace this full playback review.
+
+**Required evidence:** full-playback pass/fail result plus timestamps for every defect found and corrected.
+
+### 12. Final Render Integrity
+Validate the **actual MP4 that will be delivered to the user**, after the final render is complete.
+
+Confirm:
+- true full-frame 9:16
+- 1080×1920 for Shorts unless explicitly requested otherwise
+- correct first and last frame
+- no black bars or unintended cropping
+- no duplicated visual segments
+- no bounce / animation artifacts
+- correct transition behavior
+- audio present throughout
+- slide-to-voice synchronization
+- full decode succeeds without errors
+
+**Required evidence:** final render checklist, technical media properties, and visual spot checks of the delivered file.
 
 ## Definition of `tested and validated`
 
 Do **not** say an artifact is tested and validated unless the relevant QA evidence exists.
 
-A technically valid 1080×1920 MP4 is not enough if the visible content is letterboxed, misaligned, unrealistic, missing audio, out of sync, or contains slide bleed.
+A technically valid MP4 is not enough if the visible content is letterboxed, misaligned, unrealistic, repeated, bouncing, missing audio, out of sync, or contains slide bleed.
+
+A video cannot be marked **READY** until CP11 Viewer Playback Validation and CP12 Final Render Integrity both pass on the exact file being sent for approval.
+
+## Production Control Tower
+
+Every active video must expose a visible status summary containing:
+- current stage
+- completion percentage
+- last completed activity
+- current activity
+- next gate
+- blockers
+- last updated timestamp
+
+If no active execution is occurring, say so explicitly. Do not imply background work is continuing when it is not.
 
 ## Living tracker
 
@@ -109,4 +160,4 @@ The master spreadsheet is:
 
 `Universal_Video_Production_QC_Living_Tracker.xlsx`
 
-For each video, record the status of all 10 checkpoints and the evidence/fix notes. Historical videos should not be retroactively claimed as compliant unless they are actually reviewed against this playbook.
+For each video, record the status of all 12 checkpoints and the evidence/fix notes. Historical videos should not be retroactively claimed as compliant unless they are actually reviewed against this playbook.
