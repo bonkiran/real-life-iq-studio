@@ -2,6 +2,12 @@
 
 A lightweight web app for managing the REAL-LIFE IQ video creation workflow in one place.
 
+## Universal production standard
+
+All channels and future videos use the shared [Universal Production Playbook](PRODUCTION_PLAYBOOK.md). It defines the 10 required production checkpoints covering story lock, continuity, physical realism, cinematic storytelling, internal batch QA, visual QC, separate slide/voice/video validation, visual pacing, reusable shot patterns, and end-to-end pipeline discipline.
+
+The companion living workbook is `Universal_Video_Production_QC_Living_Tracker.xlsx`; every new video should be updated against all 10 checkpoints with evidence or required fixes.
+
 ## V1 features
 
 - Dashboard for production status
