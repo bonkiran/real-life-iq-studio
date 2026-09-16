@@ -12,6 +12,7 @@ DB_PATH = DATA_DIR / "studio.db"
 SEED_FILES = [
     BASE_DIR / "seed" / "catalog.json",
     BASE_DIR / "seed" / "recovery_backlog.json",
+    BASE_DIR / "seed" / "planning_ideas.json",
 ]
 
 
