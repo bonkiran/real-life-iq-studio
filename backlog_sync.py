@@ -13,6 +13,10 @@ SEED_FILES = [
     BASE_DIR / "seed" / "catalog.json",
     BASE_DIR / "seed" / "recovery_backlog.json",
     BASE_DIR / "seed" / "planning_ideas.json",
+    BASE_DIR / "seed" / "cybercrime_planning_1.json",
+    BASE_DIR / "seed" / "cybercrime_planning_2.json",
+    BASE_DIR / "seed" / "cybercrime_planning_3.json",
+    BASE_DIR / "seed" / "cybercrime_planning_4.json",
 ]
 
 
