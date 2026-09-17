@@ -26,6 +26,15 @@ PUBLISHED_IDEA_IDS = {
     "P009",  # Fake job / task scam
     "P013",  # WhatsApp investment group
     "P061",  # Phone stolen / recovery series
+    "P062",  # Gmail recovery
+    "P063",  # Bank account recovery
+    "P064",  # Instagram recovery
+    "P065",  # SIM swap recovery
+    "P066",  # Sent money to scammer
+    "P068",  # Facebook hacked recovery
+    "P071",  # Lost/stolen card recovery
+    "P088",  # AirPods recovery
+    "P090",  # Lost luggage recovery
 }
 
 
@@ -36,6 +45,8 @@ def _ensure_video_schema(con):
         "voice_over_text": "TEXT",
         "trigger_text": "TEXT",
         "script_text": "TEXT",
+        "channel_id": "INTEGER",
+        "channel_video_no": "INTEGER",
     }
     for name, sql_type in additions.items():
         if name not in columns:
@@ -77,6 +88,36 @@ def _load_channel_snapshot():
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _find_published_workspace(con, channel_no: int, title: str):
+    """Find the correct production workspace without assuming workspace # == YouTube #.
+
+    Early REAL-LIFE IQ videos used matching production and publication numbers. Later
+    projects developed gaps, so published order must live in channel_video_no instead
+    of overwriting the video's global production number.
+    """
+    video = con.execute(
+        "SELECT * FROM videos WHERE channel_id=1 AND channel_video_no=?",
+        (channel_no,),
+    ).fetchone()
+    if video:
+        return video
+
+    video = con.execute("SELECT * FROM videos WHERE title=?", (title,)).fetchone()
+    if video:
+        return video
+
+    # Legacy fallback is safe only for the original contiguous first 25 publications.
+    if channel_no <= 25:
+        return con.execute("SELECT * FROM videos WHERE number=?", (channel_no,)).fetchone()
+    return None
+
+
+def _next_safe_workspace_number(con, preferred: int) -> int:
+    if not con.execute("SELECT 1 FROM videos WHERE number=?", (preferred,)).fetchone():
+        return preferred
+    return int(con.execute("SELECT COALESCE(MAX(number),0)+1 n FROM videos").fetchone()["n"])
+
+
 def sync_whatsapp_series(db_connect, ensure_stages):
     """Synchronize REAL-LIFE IQ's published channel library and production workflow."""
     con = db_connect()
@@ -90,18 +131,19 @@ def sync_whatsapp_series(db_connect, ensure_stages):
         captured_at = snapshot.get("captured_at") or datetime.now().date().isoformat()
 
         for row in snapshot.get("videos", []):
-            number = int(row["number"])
+            channel_no = int(row["number"])
             topic = row["topic"]
             title = row["title"]
             publish_date = row["publish_date"]
 
-            video = con.execute("SELECT * FROM videos WHERE number=?", (number,)).fetchone()
+            video = _find_published_workspace(con, channel_no, title)
             if not video:
+                workspace_no = _next_safe_workspace_number(con, channel_no)
                 cur = con.execute(
                     """INSERT INTO videos
-                       (number,topic,title,status,upload_date,publish_date,created_at,updated_at)
-                       VALUES(?,?,?,?,?,?,?,?)""",
-                    (number, topic, title, "Published", publish_date, publish_date, now, now),
+                       (number,topic,title,status,upload_date,publish_date,created_at,updated_at,channel_id,channel_video_no)
+                       VALUES(?,?,?,?,?,?,?,?,?,?)""",
+                    (workspace_no, topic, title, "Published", publish_date, publish_date, now, now, 1, channel_no),
                 )
                 video_id = cur.lastrowid
                 ensure_stages(con, video_id)
@@ -110,9 +152,10 @@ def sync_whatsapp_series(db_connect, ensure_stages):
                 con.execute(
                     """UPDATE videos
                        SET topic=?, title=?, status='Published',
-                           upload_date=?, publish_date=?, updated_at=?
+                           upload_date=?, publish_date=?, updated_at=?,
+                           channel_id=1, channel_video_no=?
                        WHERE id=?""",
-                    (topic, title, publish_date, publish_date, now, video_id),
+                    (topic, title, publish_date, publish_date, now, channel_no, video_id),
                 )
 
             # Published videos have completed all six production phases.
