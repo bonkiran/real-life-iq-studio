@@ -15,6 +15,8 @@ BASE_DIR = Path(__file__).resolve().parent
 
 PUBLISHED_STATUSES = {"Published", "Completed", "Uploaded", "Final Published"}
 
+# Current channel topics confirmed as already published. This supplements the older
+# published_videos seed so backlog cleanup is durable even when the database is rebuilt.
 RECENT_PUBLISHED_TITLES = [
     "Facebook Hacked Recovery",
     "Credit Card Lost or Stolen",
@@ -23,6 +25,7 @@ RECENT_PUBLISHED_TITLES = [
     "Amazon Account Hacked",
 ]
 
+# Ideas that are direct duplicates of videos already published on the channel.
 PUBLISHED_IDEA_IDS = {
     "P001", "P002", "P003", "P004", "P005", "P006", "P008", "P009",
     "P012", "P013", "P061", "P062", "P063", "P064", "P065", "P066",
@@ -61,10 +64,11 @@ ACTIVE_PROJECTS = [
     },
 ]
 
+# Existing ideas to surface first in the editable priority queue.
 INITIAL_PRIORITY_IDS = [
-    "THFT-031",
-    "THFT-008",
-    "P069",
+    "THFT-031",   # Find My shows stolen phone at a stranger's house
+    "THFT-008",   # Car keys / key fob stolen
+    "P069",       # Wallet stolen / missing
     "ACTIVE-ATM-CARD",
     "ACTIVE-AIRTAG",
 ]
@@ -85,6 +89,7 @@ def classify_subject(row) -> str:
         if k in row.keys()
     ).lower()
 
+    # Specific lanes first; generic scam/cyber terms come later.
     if any(x in text for x in ["teen", "student", "college", "child", "gaming", "scholarship", "fafsa", "youth"]):
         return "Youth & Student Safety"
     if any(x in text for x in ["airport", "airline", "luggage", "hotel", "travel", "rental-car", "passport"]):
@@ -132,6 +137,7 @@ def _mark_published_from_seed(con) -> None:
             con.execute("UPDATE ideas SET status='Published', youtube_state='Published' WHERE id=?", (idea["id"],))
             continue
         name = _norm(idea["working_title"])
+        # Conservative text reconciliation: only mark when the concept is a close textual match.
         if name and any(name == t or (len(name) > 18 and (name in t or t in name)) for t in normalized if len(t) > 10):
             con.execute("UPDATE ideas SET status='Published', youtube_state='Published' WHERE id=?", (idea["id"],))
 
@@ -153,8 +159,8 @@ def sync_idea_backlog() -> None:
         existing = con.execute("SELECT id FROM ideas WHERE idea_id=?", (item["idea_id"],)).fetchone()
         if existing:
             con.execute(
-                "UPDATE ideas SET pillar=?,series=?,working_title=?,hook=?,problem=?,safe_action=?,audience=?,priority=?,score=?,status=?,notes=?,updated_at=? WHERE idea_id=?",
-                (item["pillar"], item["series"], item["working_title"], item["hook"], item["problem"], item["safe_action"], item["audience"], item["priority"], item["score"], item["status"], item["notes"], now, item["idea_id"]),
+                "UPDATE ideas SET pillar=?,series=?,working_title=?,hook=?,problem=?,safe_action=?,audience=?,priority=?,score=?,notes=COALESCE(notes,?),updated_at=? WHERE idea_id=?",
+                (item["pillar"], item["series"], item["working_title"], item["hook"], item["problem"], item["safe_action"], item["audience"], item["priority"], item["score"], item["notes"], now, item["idea_id"]),
             )
         else:
             con.execute(
@@ -163,20 +169,25 @@ def sync_idea_backlog() -> None:
                 (item["idea_id"], item["pillar"], item["series"], item["working_title"], item["hook"], item["problem"], item["safe_action"], item["audience"], item["priority"], item["score"], item["status"], item["notes"], now, now),
             )
 
+    # Preserve the current approved state of the wallet project instead of duplicating it.
     con.execute(
-        "UPDATE ideas SET status='Slides Ready', notes=COALESCE(notes,'') || CASE WHEN COALESCE(notes,'')='' THEN '' ELSE ' ' END || ?, updated_at=? WHERE idea_id='P069' AND status NOT IN ('Published','Completed','Uploaded')",
+        "UPDATE ideas SET status='Slides Ready', notes=COALESCE(notes,'') || CASE WHEN COALESCE(notes,'')='' THEN '' ELSE ' ' END || ?, updated_at=? WHERE idea_id='P069' AND status IN ('Backlog','Planning','Next')",
         ("Eight approved individual slides are saved. Next phase: voice-over, then final video.", now),
     )
 
     _mark_published_from_seed(con)
 
+    # Fill the new subject taxonomy once, while preserving any later manual category edits.
     for row in con.execute("SELECT * FROM ideas").fetchall():
-        subject = classify_subject(row)
+        subject = row["subject"] if "subject" in row.keys() else None
+        if not subject:
+            subject = classify_subject(row)
         ystate = row["youtube_state"] if "youtube_state" in row.keys() else None
         if not ystate:
             ystate = "Published" if row["status"] in PUBLISHED_STATUSES else "Not Published"
         con.execute("UPDATE ideas SET subject=?, youtube_state=?, updated_at=COALESCE(updated_at,?) WHERE id=?", (subject, ystate, now, row["id"]))
 
+    # Seed a useful editable order once. After the user edits priorities, never overwrite it.
     ranked_count = con.execute("SELECT COUNT(*) c FROM ideas WHERE priority_no IS NOT NULL AND status NOT IN ('Published','Completed','Uploaded')").fetchone()["c"]
     if ranked_count == 0:
         n = 1
@@ -186,12 +197,11 @@ def sync_idea_backlog() -> None:
             if row and row["status"] not in PUBLISHED_STATUSES:
                 con.execute("UPDATE ideas SET priority_no=? WHERE id=?", (n, row["id"]))
                 seen.add(row["id"]); n += 1
-        placeholders = ",".join("?" for _ in seen) if seen else "-1"
         rest = con.execute(
-            f"""SELECT id FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded')
-               AND id NOT IN ({placeholders})
+            """SELECT id FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded')
+               AND id NOT IN ({})
                ORDER BY CASE WHEN priority LIKE 'A+%' THEN 1 WHEN priority LIKE 'A /%' OR priority LIKE 'A/%' THEN 2 ELSE 3 END,
-                        score DESC, idea_id""",
+                        score DESC, idea_id""".format(",".join("?" for _ in seen) if seen else "-1"),
             list(seen),
         ).fetchall()
         for row in rest:
@@ -271,6 +281,7 @@ def update_idea_priority(idea_id: int, priority_no: str = Form("")):
         except ValueError:
             desired = len(order) + 1
         order.insert(min(desired - 1, len(order)), idea_id)
+    # blank means unranked; keep it out of the numbered sequence
     for pos, rid in enumerate(order, start=1):
         con.execute("UPDATE ideas SET priority_no=?, updated_at=? WHERE id=?", (pos, datetime.now().isoformat(timespec="seconds"), rid))
     if not raw:
