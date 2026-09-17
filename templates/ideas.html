@@ -1,17 +1,73 @@
 {% extends 'base.html' %}
-{% block page_title %}Idea Library{% endblock %}
-{% block page_subtitle %}Strategic backlog from the REAL-LIFE IQ living tracker.{% endblock %}
+{% block page_title %}Prioritized Idea Backlog{% endblock %}
+{% block page_subtitle %}Unfinished REAL-LIFE IQ ideas, grouped by subject and ordered by your editable Priority #.{% endblock %}
 {% block content %}
+<style>
+.backlog-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}.backlog-summary .stat-card strong{font-size:24px}.view-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.view-tabs a{padding:8px 12px;border-radius:999px;background:#eef3f7;color:#36536b;font-size:12px;font-weight:800}.view-tabs a.active{background:#102a43;color:white}.subject-section{margin:20px 0 26px}.subject-head{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #e9eff4;padding-bottom:8px;margin-bottom:12px}.subject-head h2{margin:0;font-size:19px}.subject-count{font-size:11px;background:#edf3f7;border-radius:999px;padding:5px 8px;color:#587083}.priority-editor{display:flex;gap:6px;align-items:center}.priority-editor input{width:68px!important;margin:0!important;padding:7px 8px!important}.priority-badge{display:inline-grid;place-items:center;min-width:38px;height:32px;border-radius:9px;background:#102a43;color:white;font-size:13px;font-weight:900}.idea-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.idea-actions form{margin:0}.meta-editor{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:10px}.meta-editor select{width:100%;border:1px solid #cdd8e1;border-radius:8px;padding:7px 8px;background:white;color:#203040}.phase-note{font-size:11px;color:#176744;font-weight:700;margin-top:8px}.published-note{background:#e9f7ef;color:#176744;padding:5px 7px;border-radius:6px;font-size:10px;font-weight:800}@media(max-width:900px){.backlog-summary{grid-template-columns:1fr}.meta-editor{grid-template-columns:1fr}.idea-grid{grid-template-columns:1fr}}
+</style>
+
+<section class="backlog-summary">
+  <div class="stat-card"><span>Unfinished / not uploaded</span><strong>{{ counts.unfinished }}</strong></div>
+  <div class="stat-card"><span>Already published / excluded</span><strong>{{ counts.published }}</strong></div>
+  <div class="stat-card"><span>Active subject groups</span><strong>{{ counts.subjects }}</strong></div>
+</section>
+
 <section class="panel">
-  <form class="filters" method="get"><input name="q" value="{{ q }}" placeholder="Search ideas"><select name="pillar"><option value="">All pillars</option>{% for x in pillars %}<option value="{{x}}" {{'selected' if pillar==x else ''}}>{{x}}</option>{% endfor %}</select><select name="status"><option value="">All statuses</option>{% for x in statuses %}<option value="{{x}}" {{'selected' if status==x else ''}}>{{x}}</option>{% endfor %}</select><button class="button secondary">Filter</button></form>
+  <div class="view-tabs">
+    <a class="{{ 'active' if view=='unfinished' else '' }}" href="{{ url_for('ideas') }}?view=unfinished">Unfinished ideas</a>
+    <a class="{{ 'active' if view=='all' else '' }}" href="{{ url_for('ideas') }}?view=all">All ideas</a>
+    <a class="{{ 'active' if view=='published' else '' }}" href="{{ url_for('ideas') }}?view=published">Published / completed</a>
+  </div>
+  <form class="filters" method="get">
+    <input type="hidden" name="view" value="{{ view }}">
+    <input name="q" value="{{ q }}" placeholder="Search ideas">
+    <select name="subject"><option value="">All subjects</option>{% for x in subjects %}<option value="{{x}}" {{'selected' if subject==x else ''}}>{{x}}</option>{% endfor %}</select>
+    <select name="pillar"><option value="">All pillars</option>{% for x in pillars %}<option value="{{x}}" {{'selected' if pillar==x else ''}}>{{x}}</option>{% endfor %}</select>
+    <select name="status"><option value="">All statuses</option>{% for x in statuses %}<option value="{{x}}" {{'selected' if status==x else ''}}>{{x}}</option>{% endfor %}</select>
+    <button class="button secondary">Filter</button>
+  </form>
+</section>
+
+{% for subject_name, subject_ideas in grouped.items() %}
+<section class="subject-section">
+  <div class="subject-head"><h2>{{ subject_name }}</h2><span class="subject-count">{{ subject_ideas|length }} ideas</span></div>
   <div class="idea-grid">
-  {% for i in ideas %}<article class="idea-card">
-    <div class="idea-top"><span>{{ i.idea_id or ('IDEA-' ~ i.id) }}</span><b>{{ i.priority or '' }}</b></div>
-    <h3>{{ i.working_title }}</h3><p>{{ i.problem or i.hook or '' }}</p>
-    <div class="idea-meta"><span>{{ i.pillar }}</span><span>{{ i.series }}</span><span>{{ i.status }}</span></div>
-    <details><summary>Safe action & source</summary><p>{{ i.safe_action or '' }}</p>{% if i.source_url %}<a href="{{ i.source_url }}" target="_blank">{{ i.source_name or 'Source' }} ↗</a>{% endif %}</details>
-    {% if i.status not in ['Published','Final Ready','In Production'] %}<form method="post" action="{{ url_for('promote_idea', idea_id=i.id) }}"><button class="button small">Start production</button></form>{% endif %}
-  </article>{% endfor %}
+  {% for i in subject_ideas %}
+    <article class="idea-card">
+      <div class="idea-top">
+        <span>{{ i.idea_id or ('IDEA-' ~ i.id) }}</span>
+        {% if i.status in ['Published','Completed','Uploaded'] %}<span class="published-note">{{ i.status }}</span>{% else %}<b>{{ i.priority or '' }}</b>{% endif %}
+      </div>
+      <h3>{{ i.working_title }}</h3>
+      <p>{{ i.problem or i.hook or '' }}</p>
+      <div class="idea-meta"><span>{{ i.subject }}</span><span>{{ i.series }}</span><span>{{ i.status }}</span></div>
+      {% if i.notes and ('approved individual slides' in i.notes|lower or 'next phase' in i.notes|lower) %}<div class="phase-note">{{ i.notes }}</div>{% endif %}
+
+      {% if i.status not in ['Published','Completed','Uploaded'] %}
+      <div class="idea-actions">
+        <span class="priority-badge">#{{ i.priority_no or '—' }}</span>
+        <form class="priority-editor" method="post" action="{{ url_for('update_idea_priority', idea_id=i.id) }}">
+          <input name="priority_no" type="number" min="1" value="{{ i.priority_no or '' }}" placeholder="#">
+          <button class="button small secondary" type="submit">Update priority</button>
+        </form>
+      </div>
+      {% endif %}
+
+      <details><summary>Action, source & organization</summary>
+        <p>{{ i.safe_action or '' }}</p>
+        {% if i.source_url %}<a href="{{ i.source_url }}" target="_blank">{{ i.source_name or 'Source' }} ↗</a>{% endif %}
+        <form class="meta-editor" method="post" action="{{ url_for('update_idea_metadata', idea_id=i.id) }}">
+          <select name="subject">{% for x in subjects %}<option value="{{x}}" {{'selected' if i.subject==x else ''}}>{{x}}</option>{% endfor %}</select>
+          <select name="status">{% for x in statuses %}<option value="{{x}}" {{'selected' if i.status==x else ''}}>{{x}}</option>{% endfor %}{% if 'Slides Ready' not in statuses %}<option value="Slides Ready" {{'selected' if i.status=='Slides Ready' else ''}}>Slides Ready</option>{% endif %}<option value="Completed">Completed</option><option value="Uploaded">Uploaded</option></select>
+          <button class="button small secondary">Save</button>
+        </form>
+      </details>
+      {% if i.status not in ['Published','Completed','Uploaded','In Production'] %}<form method="post" action="{{ url_for('promote_idea', idea_id=i.id) }}"><button class="button small">Start production</button></form>{% endif %}
+    </article>
+  {% endfor %}
   </div>
 </section>
+{% else %}
+<section class="panel"><p>No ideas match the current filters.</p></section>
+{% endfor %}
 {% endblock %}
