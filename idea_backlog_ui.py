@@ -9,8 +9,10 @@ from fastapi import Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 import app as studio
+from published_dashboard import install_published_dashboard
 
 app = studio.app
+install_published_dashboard(app, studio.templates, studio.ctx, studio.db_connect)
 BASE_DIR = Path(__file__).resolve().parent
 
 PUBLISHED_STATUSES = {"Published", "Completed", "Uploaded", "Final Published"}
