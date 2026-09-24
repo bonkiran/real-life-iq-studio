@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block page_title %}Production Dashboard · {{ selected_channel.name }}{% endblock %}
+{% block page_subtitle %}Published YouTube videos for this channel, in publication sequence.{% endblock %}
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card"><span>Published videos</span><strong>{{ published_videos|length }}</strong></div>
+  <div class="stat-card"><span>Latest sequence</span><strong>{% if published_videos %}#{{ published_videos[0].sequence_no }}{% else %}0{% endif %}</strong></div>
+  <div class="stat-card"><span>Latest published</span><strong>{{ latest_date or 'Not yet' }}</strong></div>
+</div>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>{{ selected_channel.name }} · Published Videos</h2>
+      <p>Sequence number reflects publication order within this channel.</p>
+    </div>
+  </div>
+
+  {% if published_videos %}
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="text-align:left;border-bottom:1px solid var(--border,#d9dde5)">
+          <th style="padding:12px 10px;width:110px">Sequence #</th>
+          <th style="padding:12px 10px">Published video</th>
+          <th style="padding:12px 10px;width:150px">Published date</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for video in published_videos %}
+        <tr style="border-bottom:1px solid var(--border,#e7e9ee)">
+          <td style="padding:13px 10px;font-weight:700">#{{ video.sequence_no }}</td>
+          <td style="padding:13px 10px">{{ video.title }}</td>
+          <td style="padding:13px 10px;white-space:nowrap">{{ video.publish_date }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div style="padding:28px 4px">
+      <h3 style="margin-bottom:8px">No published videos added yet.</h3>
+      <p class="muted">When {{ selected_channel.name }} videos are published, they will appear here with their channel sequence number and publish date.</p>
+    </div>
+  {% endif %}
+</section>
+
+{% endblock %}
