@@ -14,6 +14,7 @@ app = studio.app
 BASE_DIR = Path(__file__).resolve().parent
 
 PUBLISHED_STATUSES = {"Published", "Completed", "Uploaded", "Final Published"}
+IDEA_TERMINAL_STATUSES = PUBLISHED_STATUSES | {"Done", "Duplicate"}
 
 # Current channel topics confirmed as already published. This supplements the older
 # published_videos seed so backlog cleanup is durable even when the database is rebuilt.
@@ -188,17 +189,17 @@ def sync_idea_backlog() -> None:
         con.execute("UPDATE ideas SET subject=?, youtube_state=?, updated_at=COALESCE(updated_at,?) WHERE id=?", (subject, ystate, now, row["id"]))
 
     # Seed a useful editable order once. After the user edits priorities, never overwrite it.
-    ranked_count = con.execute("SELECT COUNT(*) c FROM ideas WHERE priority_no IS NOT NULL AND status NOT IN ('Published','Completed','Uploaded')").fetchone()["c"]
+    ranked_count = con.execute("SELECT COUNT(*) c FROM ideas WHERE priority_no IS NOT NULL AND status NOT IN ('Published','Completed','Uploaded','Done','Duplicate')").fetchone()["c"]
     if ranked_count == 0:
         n = 1
         seen = set()
         for idea_id in INITIAL_PRIORITY_IDS:
             row = con.execute("SELECT id,status FROM ideas WHERE idea_id=?", (idea_id,)).fetchone()
-            if row and row["status"] not in PUBLISHED_STATUSES:
+            if row and row["status"] not in IDEA_TERMINAL_STATUSES:
                 con.execute("UPDATE ideas SET priority_no=? WHERE id=?", (n, row["id"]))
                 seen.add(row["id"]); n += 1
         rest = con.execute(
-            """SELECT id FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded')
+            """SELECT id FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded','Done','Duplicate')
                AND id NOT IN ({})
                ORDER BY CASE WHEN priority LIKE 'A+%' THEN 1 WHEN priority LIKE 'A /%' OR priority LIKE 'A/%' THEN 2 ELSE 3 END,
                         score DESC, idea_id""".format(",".join("?" for _ in seen) if seen else "-1"),
@@ -226,9 +227,13 @@ def ideas_page(request: Request, q: str = "", status: str = "", subject: str = "
     sql = "SELECT * FROM ideas WHERE 1=1"
     args = []
     if view == "unfinished" and not status:
-        sql += " AND status NOT IN ('Published','Completed','Uploaded')"
+        sql += " AND status NOT IN ('Published','Completed','Uploaded','Done','Duplicate')"
     elif view == "published" and not status:
         sql += " AND status IN ('Published','Completed','Uploaded')"
+    elif view == "done" and not status:
+        sql += " AND status='Done'"
+    elif view == "duplicates" and not status:
+        sql += " AND status='Duplicate'"
     if q:
         sql += " AND (working_title LIKE ? OR problem LIKE ? OR hook LIKE ? OR notes LIKE ?)"
         args += [f"%{q}%"] * 4
@@ -244,9 +249,11 @@ def ideas_page(request: Request, q: str = "", status: str = "", subject: str = "
     pillars = [r[0] for r in con.execute("SELECT DISTINCT pillar FROM ideas WHERE pillar IS NOT NULL ORDER BY pillar")]
     statuses = [r[0] for r in con.execute("SELECT DISTINCT status FROM ideas WHERE status IS NOT NULL ORDER BY status")]
     counts = {
-        "unfinished": con.execute("SELECT COUNT(*) c FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded')").fetchone()["c"],
+        "unfinished": con.execute("SELECT COUNT(*) c FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded','Done','Duplicate')").fetchone()["c"],
         "published": con.execute("SELECT COUNT(*) c FROM ideas WHERE status IN ('Published','Completed','Uploaded')").fetchone()["c"],
-        "subjects": con.execute("SELECT COUNT(DISTINCT subject) c FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded')").fetchone()["c"],
+        "done": con.execute("SELECT COUNT(*) c FROM ideas WHERE status='Done'").fetchone()["c"],
+        "duplicates": con.execute("SELECT COUNT(*) c FROM ideas WHERE status='Duplicate'").fetchone()["c"],
+        "subjects": con.execute("SELECT COUNT(DISTINCT subject) c FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded','Done','Duplicate')").fetchone()["c"],
     }
     con.close()
     grouped = {}
@@ -268,7 +275,7 @@ def update_idea_priority(idea_id: int, priority_no: str = Form("")):
         con.close(); return RedirectResponse(url="/ideas", status_code=303)
 
     active = con.execute(
-        """SELECT id FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded')
+        """SELECT id FROM ideas WHERE status NOT IN ('Published','Completed','Uploaded','Done','Duplicate')
            ORDER BY CASE WHEN priority_no IS NULL THEN 1 ELSE 0 END, priority_no,
                     CASE WHEN priority LIKE 'A+%' THEN 1 WHEN priority LIKE 'A /%' OR priority LIKE 'A/%' THEN 2 ELSE 3 END,
                     score DESC, idea_id"""
@@ -300,6 +307,24 @@ def update_idea_metadata(idea_id: int, subject: str = Form(""), status: str = Fo
                 (subject, status, youtube_state, datetime.now().isoformat(timespec="seconds"), idea_id))
     con.commit(); con.close()
     return RedirectResponse(url="/ideas?view=unfinished", status_code=303)
+
+
+@app.post("/ideas/{idea_id}/quick-status", name="update_idea_quick_status")
+def update_idea_quick_status(idea_id: int, status: str = Form(...), return_view: str = Form("unfinished")):
+    if status not in {"Done", "Duplicate"}:
+        return RedirectResponse(url="/ideas?view=unfinished", status_code=303)
+    con = studio.db_connect()
+    row = con.execute("SELECT id FROM ideas WHERE id=?", (idea_id,)).fetchone()
+    if row:
+        con.execute(
+            "UPDATE ideas SET status=?,youtube_state='Not Published',priority_no=NULL,updated_at=? WHERE id=?",
+            (status, datetime.now().isoformat(timespec="seconds"), idea_id),
+        )
+        con.commit()
+    con.close()
+    if return_view not in {"unfinished", "all", "published", "done", "duplicates"}:
+        return_view = "unfinished"
+    return RedirectResponse(url=f"/ideas?view={return_view}", status_code=303)
 
 
 @app.post("/ideas/{idea_id}/promote", name="promote_idea")
