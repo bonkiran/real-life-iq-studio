@@ -43,16 +43,21 @@ Keep each video tightly scoped to its own scam type. Do not merge the four video
 
 ## Current active work
 
-Video 1, Variation 1: Fake payment screenshot / fake payment email.
+Video 1, Variation 2: Seller already shipped or handed over the item after fake payment proof.
 
 Locked decision point:
-"The buyer says they paid. Do you trust their proof, or verify the money yourself?"
+"The seller realizes the payment was fake only after the item is already gone. What can still be recovered?"
 
 Current scope:
-A seller lists an item. A scammer posing as a buyer claims payment was sent and presents a screenshot, email, text, or app-style notification as proof. The seller must independently open the real bank or payment app and verify that the money is actually received before shipping or handing over the item.
+A seller has already shipped or handed over an item after trusting fake payment proof from a scammer posing as a buyer. The recovery path depends on whether the package is still in transit, already delivered, or the item was handed over in person.
+
+Core recovery branches:
+- Package still in transit: contact the carrier immediately and request any available intercept, return-to-sender, hold, or reroute option.
+- Package already delivered: preserve tracking and delivery evidence, report the marketplace account, file fraud reports, and contact local law enforcement when appropriate.
+- In-person handoff: do not confront the buyer; preserve profile/messages/location details and report the fraud.
 
 Out of scope for this variation:
+- Prevention before the item is released
 - Overpayment and refund requests
 - Verification-code scams
 - Buyer-side off-platform payment scams
-- Recovery after the seller has already handed over or shipped the item
