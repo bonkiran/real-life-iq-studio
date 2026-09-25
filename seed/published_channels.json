@@ -219,7 +219,34 @@
     {
       "slug": "gallop-on",
       "name": "Gallop On",
-      "videos": []
+      "videos": [
+        {
+          "sequence_no": 1,
+          "title": "How To Make Your Horse Actually LOVE You | 7 Secrets Riders Miss",
+          "publish_date": "09-01-2026"
+        }
+      ]
+    },
+    {
+      "slug": "wisdom-of-epics",
+      "name": "Wisdom of Epics",
+      "videos": [
+        {
+          "sequence_no": 1,
+          "title": "Bhagavad Gita: One Simple Lesson That Can End Stress, Anxiety, and Fear | Stop Worrying",
+          "publish_date": "06-01-2026"
+        },
+        {
+          "sequence_no": 2,
+          "title": "Best Karma Bhagavad Gita Quote | Krishna's Teaching: Arjuna's Way to Truth | Wisdom of Epics",
+          "publish_date": "06-05-2026"
+        },
+        {
+          "sequence_no": 3,
+          "title": "Mahabharata: How One Family Feud Destroyed a Dynasty | Part 1",
+          "publish_date": "06-19-2026"
+        }
+      ]
     }
   ]
 }
