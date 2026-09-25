@@ -110,10 +110,10 @@ def _ensure_schema(con):
              format_strategy,language_strategy,visual_style,source_policy,notes,created_at,updated_at)
            VALUES(2,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (
-            "mahabharata-timeless-wisdom",
-            "Mahabharata — Timeless Wisdom",
+            "wisdom-of-epics",
+            "Wisdom of Epics",
             None,
-            "Incubator",
+            "Active",
             "Use important Mahabharata stories to teach timeless lessons in morality, emotional intelligence, character, strength, wisdom, inner belief and core confidence.",
             "Ancient epic. Modern strength. Timeless wisdom.",
             "A global audience interested in powerful stories, personal growth, emotional intelligence, leadership, resilience and Indian epic wisdom.",
@@ -128,7 +128,15 @@ def _ensure_schema(con):
         ),
     )
 
-    # Existing production records belong to REAL-LIFE IQ unless explicitly assigned elsewhere.
+    # Align the earlier Mahabharata incubator record with the actual published YouTube channel.
+    con.execute(
+        """UPDATE channels
+           SET slug='wisdom-of-epics', name='Wisdom of Epics', status='Active', updated_at=?
+           WHERE id=2 OR slug='mahabharata-timeless-wisdom'""",
+        (now,),
+    )
+
+        # Existing production records belong to REAL-LIFE IQ unless explicitly assigned elsewhere.
     con.execute("UPDATE videos SET channel_id=1 WHERE channel_id IS NULL")
     con.execute("UPDATE videos SET channel_video_no=number WHERE channel_video_no IS NULL AND channel_id=1")
     con.execute("UPDATE ideas SET channel_id=1 WHERE channel_id IS NULL")
