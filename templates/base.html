@@ -14,7 +14,7 @@
       <div>
         <strong>IMPACT</strong>
         <span>Content Studio</span>
-        <small style="display:block;margin-top:4px;font-size:10px;letter-spacing:.08em;opacity:.68">Build #20260924.02</small>
+        <small style="display:block;margin-top:4px;font-size:10px;letter-spacing:.08em;opacity:.68">Build #20260924.03</small>
       </div>
     </div>
     <nav>
@@ -24,6 +24,7 @@
       <div style="margin:-3px 0 8px 18px;display:grid;gap:3px">
         <a style="font-size:12px;padding:7px 10px" class="{{ 'active' if request.url.path == '/production/real-life-iq' else '' }}" href="/production/real-life-iq">REAL-LIFE IQ</a>
         <a style="font-size:12px;padding:7px 10px" class="{{ 'active' if request.url.path == '/production/gallop-on' else '' }}" href="/production/gallop-on">Gallop On</a>
+        <a style="font-size:12px;padding:7px 10px" class="{{ 'active' if request.url.path == '/production/wisdom-of-epics' else '' }}" href="/production/wisdom-of-epics">Wisdom of Epics</a>
       </div>
       <a class="{{ 'active' if request.url.path.startswith('/videos') else '' }}" href="{{ url_for('videos') }}">All Videos</a>
       <a class="{{ 'active' if request.url.path.startswith('/ideas') else '' }}" href="{{ url_for('ideas') }}">Idea Library</a>
@@ -42,7 +43,7 @@
     </header>
 
     {% block content %}{% endblock %}
-    <footer>Impact Content Studio · Build #20260924.02 · {{ now_year }}</footer>
+    <footer>Impact Content Studio · Build #20260924.03 · {{ now_year }}</footer>
   </main>
 <script>
 (() => {
